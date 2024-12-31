@@ -10,6 +10,8 @@ import UIKit
 final class TrackerViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
+    private var categories: [TrackerCategory] = []
+    private var completedTrackers: [TrackerRecord] = []
     
     private lazy var label: UILabel = {
         let label = UILabel()
@@ -22,7 +24,9 @@ final class TrackerViewController: UIViewController {
     
     private lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
+        datePicker.preferredDatePickerStyle = .compact
         datePicker.datePickerMode = .date
+        datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         datePicker.accessibilityIdentifier = "DatePicker"
         return datePicker
@@ -38,13 +42,13 @@ final class TrackerViewController: UIViewController {
         return button
     }()
     
-    private lazy var textField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "🔍 Поиск"
+    private lazy var textField: UISearchBar = {
+        let textField = UISearchBar()
+        textField.placeholder = "Поиск"
         textField.backgroundColor = .ypGray
-        textField.textColor = .black
-        textField.layer.cornerRadius = 10
-        textField.font = .systemFont(ofSize: .init(17), weight: .regular)
+        textField.searchTextField.font = .systemFont(ofSize: .init(17), weight: .regular)
+        textField.layer.cornerRadius = 15;
+        textField.clipsToBounds = true;
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -78,13 +82,13 @@ final class TrackerViewController: UIViewController {
     
     private func addLabel(label: UILabel) {
         view.addSubview(label)
-        NSLayoutConstraint.activate([label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 15),
+        NSLayoutConstraint.activate([label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50)])
     }
     
     private func addDatePicker(datePicker: UIDatePicker) {
         view.addSubview(datePicker)
-        NSLayoutConstraint.activate([datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -15),
+        NSLayoutConstraint.activate([datePicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
                                      datePicker.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
                                      datePicker.widthAnchor.constraint(equalToConstant: 100),
                                      datePicker.heightAnchor.constraint(equalToConstant: 44)])
@@ -92,16 +96,16 @@ final class TrackerViewController: UIViewController {
     
     private func addPlusBtn(button: UIButton) {
         view.addSubview(button)
-        NSLayoutConstraint.activate([button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 15),
+        NSLayoutConstraint.activate([button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 0),
                                      button.widthAnchor.constraint(equalToConstant: 44),
                                      button.heightAnchor.constraint(equalToConstant: 44)])
     }
     
-    private func addTextField(textField: UITextField) {
+    private func addTextField(textField: UISearchBar) {
         view.addSubview(textField)
-        NSLayoutConstraint.activate([textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -15),
-                                     textField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 15),
+        NSLayoutConstraint.activate([textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                                     textField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
                                      textField.heightAnchor.constraint(equalToConstant: 44)])
     }
@@ -120,9 +124,19 @@ final class TrackerViewController: UIViewController {
                                      label.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 55)])
     }
     
+    @objc func datePickerValueChanged(_ sender: UIDatePicker) {
+        let selectedDate = sender.date
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        let formattedDate = dateFormatter.string(from: selectedDate)
+        print("Выбранная дата: \(formattedDate)")
+    }
+    
     @objc
     private func didTapButton() {
-        showAlert()
+        let vc = AdditionViewComtroller()
+        vc.modalPresentationStyle = .automatic
+        present(vc, animated: true)
     }
     
     private func showAlert() {
