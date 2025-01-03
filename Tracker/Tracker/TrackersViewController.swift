@@ -1,5 +1,5 @@
 //
-//  TrackerViewController.swift
+//  TrackersViewController.swift
 //  Tracker
 //
 //  Created by Vitaly Lobov on 24.12.2024.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackerViewController: UIViewController {
+final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
     private var categories: [TrackerCategory] = []
@@ -45,10 +45,14 @@ final class TrackerViewController: UIViewController {
     private lazy var textField: UISearchBar = {
         let textField = UISearchBar()
         textField.placeholder = "Поиск"
-        textField.backgroundColor = .ypGray
-        textField.searchTextField.font = .systemFont(ofSize: .init(17), weight: .regular)
         textField.layer.cornerRadius = 15;
-        textField.clipsToBounds = true;
+        textField.layer.masksToBounds = true
+        textField.layer.borderWidth = 0.5
+        textField.backgroundImage = UIImage()
+        textField.searchTextField.backgroundColor = .clear
+        textField.backgroundColor = .ypGray
+        textField.layer.borderColor = UIColor.ypGray.cgColor
+        textField.searchTextField.font = .systemFont(ofSize: .init(17), weight: .regular)
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()

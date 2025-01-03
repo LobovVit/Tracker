@@ -17,6 +17,7 @@ final class AdditionViewComtroller: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.layer.cornerRadius = 15;
+        button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(didTapNewHabit), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityIdentifier = "newHabitBtn"
@@ -29,6 +30,7 @@ final class AdditionViewComtroller: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.layer.cornerRadius = 15;
+        button.layer.masksToBounds = true
         button.addTarget(self, action: #selector(didTapNewIrregularBtn), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityIdentifier = "newIrregularBtn"
@@ -62,7 +64,9 @@ final class AdditionViewComtroller: UIViewController {
     
     @objc
     private func didTapNewIrregularBtn() {
-        showAlert(message: "Добавить нерегулярное событие?")
+        let vc = IrregularViewController()
+        vc.modalPresentationStyle = .automatic
+        present(vc, animated: true)
     }
     
     private func showAlert(message: String) {

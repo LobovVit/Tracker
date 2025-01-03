@@ -1,19 +1,19 @@
 //
-//  HabitViewController.swift
+//  IrregularViewController.swift
 //  Tracker
 //
-//  Created by Vitaly Lobov on 29.12.2024.
+//  Created by Vitaly Lobov on 02.01.2025.
 //
 
 import UIKit
 
-final class HabitViewController: UIViewController {
+final class IrregularViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "Новая привычка"
+        label.text = "Новое нерегулярное событие"
         label.textColor = .black
         label.font = .systemFont(ofSize: .init(22), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -26,6 +26,7 @@ final class HabitViewController: UIViewController {
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .gray
         button.layer.cornerRadius = 15;
+        button.layer.masksToBounds = true
         button.layer.borderColor = .init(red: 0.8, green: 0.0, blue: 0.0, alpha: 0.0)
         button.layer.borderWidth = 1.0
         button.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
@@ -40,6 +41,7 @@ final class HabitViewController: UIViewController {
         button.setTitleColor(.red, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 15;
+        button.layer.masksToBounds = true
         button.layer.borderColor = UIColor.red.cgColor
         button.layer.borderWidth = 1.0
         button.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
@@ -52,7 +54,7 @@ final class HabitViewController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 15;
-        textField.layer.borderColor = UIColor.lightGray.cgColor
+        textField.layer.masksToBounds = true
         textField.backgroundColor = .ypGray
         textField.layer.borderWidth = 0.5
         textField.layer.borderColor = UIColor.lightGray.cgColor
@@ -73,7 +75,6 @@ final class HabitViewController: UIViewController {
         button.tintColor = .black
         button.backgroundColor = .ypGray
         button.layer.cornerRadius = 15
-        button.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         button.layer.masksToBounds = true
         button.layer.borderWidth = 0.5
         button.layer.borderColor = UIColor.lightGray.cgColor
@@ -86,27 +87,6 @@ final class HabitViewController: UIViewController {
         return button
     }()
     
-    private lazy var sceduleBtn: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("Расписание", for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: .init(17), weight: .regular)
-        button.setImage(UIImage(named: "drill_down"), for: .normal)
-        button.tintColor = .black
-        button.backgroundColor = .ypGray
-        button.layer.cornerRadius = 15
-        button.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        button.layer.masksToBounds = true
-        button.layer.borderWidth = 0.5
-        button.layer.borderColor = UIColor.lightGray.cgColor
-        button.contentHorizontalAlignment = .left
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: view.frame.width - 80, bottom: 0, right: 0)
-        button.addTarget(self, action: #selector(didTapScedule), for: .touchUpInside)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.accessibilityIdentifier = "sceduleBtn"
-        return button
-    }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         alertPresenter = AlertPresenter(viewController: self)
@@ -116,12 +96,11 @@ final class HabitViewController: UIViewController {
         addSaveBtn(button: saveBtn)
         addCancelBtn(button: cancelBtn)
         addCategoryBtn(button: categoryBtn)
-        addSceduleBtn(button: sceduleBtn)
     }
     
     @objc
     private func didTapSave() {
-        showAlert(message: "Сохранить привычку")
+        showAlert(message: "Сохранить событие")
     }
 
     @objc
@@ -132,13 +111,6 @@ final class HabitViewController: UIViewController {
     @objc
     private func didTapCategory() {
         showAlert(message: "Категория")
-    }
-    
-    @objc
-    private func didTapScedule() {
-        let vc = SceduleViewController()
-        vc.modalPresentationStyle = .automatic
-        present(vc, animated: true)
     }
     
     private func showAlert(message: String) {
@@ -189,14 +161,6 @@ final class HabitViewController: UIViewController {
         NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 190),
-                                     button.heightAnchor.constraint(equalToConstant: 60)])
-    }
-    
-    private func addSceduleBtn(button: UIButton) {
-        self.view.addSubview(button)
-        NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-                                     button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-                                     button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 250),
                                      button.heightAnchor.constraint(equalToConstant: 60)])
     }
     

@@ -8,14 +8,19 @@
 import UIKit
 
 final class OnboardingVIewController: UIViewController {
-    private var isFirstEnter: Bool = false
+    
     private var alertPresenter: AlertPresenting?
     
     private func switchToTabBarController() {
-        
         guard let window = UIApplication.shared.windows.first else { return }
-        let tabBarController = TabBarViewController()
-        window.rootViewController = tabBarController
+        if OnboardingLaunchedEarlier.shared.didAppStart {
+            let tabBarController = TabBarViewController()
+            window.rootViewController = tabBarController
+        } else {
+            OnboardingLaunchedEarlier.shared.didAppStart = true
+            let onboardingImagesViewController = OnboardingImagesViewController()
+            window.rootViewController = onboardingImagesViewController
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
