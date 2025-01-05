@@ -37,10 +37,10 @@ final class HabitViewController: UIViewController {
     private lazy var cancelBtn: UIButton = {
         let button = UIButton()
         button.setTitle("Отменить", for: .normal)
-        button.setTitleColor(.red, for: .normal)
+        button.setTitleColor(.ypRed, for: .normal)
         button.backgroundColor = .white
         button.layer.cornerRadius = 15;
-        button.layer.borderColor = UIColor.red.cgColor
+        button.layer.borderColor = UIColor.ypRed.cgColor
         button.layer.borderWidth = 1.0
         button.addTarget(self, action: #selector(didTapCancel), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -131,7 +131,9 @@ final class HabitViewController: UIViewController {
     
     @objc
     private func didTapCategory() {
-        showAlert(message: "Категория")
+        let vc = CategorysViewController()
+        vc.modalPresentationStyle = .automatic
+        present(vc, animated: true)
     }
     
     @objc
