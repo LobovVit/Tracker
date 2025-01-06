@@ -58,7 +58,9 @@ final class CategorysViewController: UIViewController {
     
     @objc
     private func didTapAddition() {
-        showAlert(message: "Добавить катеорию")
+        let vc = CategoryViewController()
+        vc.modalPresentationStyle = .automatic
+        present(vc, animated: true)
     }
     
     private func showAlert(message: String) {
@@ -145,9 +147,24 @@ extension CategorysViewController: UIContextMenuInteractionDelegate {
         }
     }
     
+    private func getTextFromCell(at indexPath: IndexPath) -> String? {
+            guard let cell = tableView.cellForRow(at: indexPath) else {
+                return nil
+            }
+            return cell.textLabel?.text
+        }
+    
     func makeContextMenu(forRowAt indexPath: IndexPath) -> UIMenu {
-        let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { _ in
+        let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) {  [weak self ] _ in
+            guard let self else { return }
             print("Edit row \(indexPath.row)")
+            var categoryName: String?
+            if let text = getTextFromCell(at: indexPath) {
+                categoryName = text
+            }
+            let vc = CategoryViewController(categoryName: categoryName)
+            vc.modalPresentationStyle = .automatic
+            self.present(vc, animated: true)
         }
         
         let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { _ in
