@@ -20,6 +20,16 @@ final class HabitViewController: UIViewController {
         return label
     }()
     
+    private lazy var warningLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Максимальное количество символов – 38"
+        label.textColor = .ypRed
+        label.font = .systemFont(ofSize: .init(16), weight: .medium)
+        label.isHidden = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private lazy var saveBtn: UIButton = {
         let button = UIButton()
         button.setTitle("Создать", for: .normal)
@@ -29,6 +39,7 @@ final class HabitViewController: UIViewController {
         button.layer.borderColor = .init(red: 0.8, green: 0.0, blue: 0.0, alpha: 0.0)
         button.layer.borderWidth = 1.0
         button.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
+        button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityIdentifier = "saveBtn"
         return button
@@ -50,6 +61,7 @@ final class HabitViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
+        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 15;
         textField.layer.borderColor = UIColor.lightGray.cgColor
@@ -113,6 +125,7 @@ final class HabitViewController: UIViewController {
         view.backgroundColor = .white
         addNameTextField(textField: nameTextField)
         addLabel(label: label)
+        addWarningLabel(label: warningLabel)
         addSaveBtn(button: saveBtn)
         addCancelBtn(button: cancelBtn)
         addCategoryBtn(button: categoryBtn)
@@ -123,7 +136,7 @@ final class HabitViewController: UIViewController {
     private func didTapSave() {
         showAlert(message: "Сохранить привычку")
     }
-
+    
     @objc
     private func didTapCancel() {
         self.dismiss(animated: true)
@@ -160,6 +173,12 @@ final class HabitViewController: UIViewController {
         view.addSubview(label)
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50)])
+    }
+    
+    private func addWarningLabel(label: UILabel) {
+        view.addSubview(label)
+        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
+                                     label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 160)])
     }
     
     private func addSaveBtn(button: UIButton) {
@@ -200,6 +219,19 @@ final class HabitViewController: UIViewController {
                                      button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 250),
                                      button.heightAnchor.constraint(equalToConstant: 60)])
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        if textField.text?.isEmpty == true {
+            saveBtn.isEnabled = false
+            saveBtn.backgroundColor = .gray
+        } else {
+            let text = textField.text ?? ""
+            warningLabel.isHidden = !(text.count > 38)
+            saveBtn.isEnabled = warningLabel.isHidden
+            saveBtn.backgroundColor = warningLabel.isHidden ? .black : .gray
+            nameTextField.clearButtonMode = text.count>0 ? .whileEditing : .never
+        }
     }
     
 }

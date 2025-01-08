@@ -10,8 +10,8 @@ import UIKit
 final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
-    private var categories: [TrackerCategory] = []
-    private var completedTrackers: [TrackerRecord] = []
+    var categories: [TrackerCategory] = []
+    var completedTrackers: [TrackerRecord] = []
     
     private lazy var label: UILabel = {
         let label = UILabel()

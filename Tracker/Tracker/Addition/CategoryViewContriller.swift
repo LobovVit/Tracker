@@ -5,7 +5,6 @@
 //  Created by Vitaly Lobov on 06.01.2025.
 //
 
-
 import UIKit
 
 final class CategoryViewController: UIViewController {
@@ -40,7 +39,13 @@ final class CategoryViewController: UIViewController {
         let button = UIButton()
         button.setTitle("Готово", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .black
+        if let categoryName {
+            button.backgroundColor = .black
+            button.isEnabled = true
+        } else {
+            button.backgroundColor = .gray
+            button.isEnabled = false
+        }
         button.layer.cornerRadius = 15;
         button.addTarget(self, action: #selector(didTapOk), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -50,6 +55,7 @@ final class CategoryViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
+        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         if let categoryName {
             textField.text = categoryName
         } else {
@@ -116,6 +122,18 @@ final class CategoryViewController: UIViewController {
                                      textField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
                                      textField.heightAnchor.constraint(equalToConstant: 60)])
+    }
+    
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        if textField.text?.isEmpty == true {
+            okBtn.isEnabled = false
+            okBtn.backgroundColor = .gray
+        } else {
+            let text = textField.text ?? ""
+            okBtn.isEnabled = text.count>0
+            okBtn.backgroundColor = text.count>0 ? .black : .gray
+            nameTextField.clearButtonMode = text.count>0 ? .whileEditing : .never
+        }
     }
     
 }
