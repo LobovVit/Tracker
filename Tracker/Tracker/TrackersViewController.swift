@@ -10,7 +10,49 @@ import UIKit
 final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
-    var categories: [TrackerCategory] = []
+    var categories: [TrackerCategory] = [TrackerCategory(name: "Моя Категория",
+                                                         trackers: [Tracker(id: UUID.init(),
+                                                                            name: "Google1",
+                                                                            color: .C_1,
+                                                                            emoji: "😻",
+                                                                            scheduler: Schedule(mon: false,
+                                                                                                tue: false,
+                                                                                                wed: false,
+                                                                                                thu: false,
+                                                                                                fri: false,
+                                                                                                sat: false,
+                                                                                                sun: true)
+                                                                           ),
+                                                                    Tracker(id: UUID.init(),
+                                                                                       name: "Google1",
+                                                                                       color: .C_3,
+                                                                                       emoji: "😻",
+                                                                                       scheduler: Schedule(mon: false,
+                                                                                                           tue: false,
+                                                                                                           wed: false,
+                                                                                                           thu: false,
+                                                                                                           fri: false,
+                                                                                                           sat: false,
+                                                                                                           sun: true)
+                                                                             )
+                                                                    ]
+                                                        ),
+                                         TrackerCategory(name: "Не моя категория",
+                                                         trackers: [Tracker(id: UUID.init(),
+                                                                            name: "Google3",
+                                                                            color: .C_2,
+                                                                            emoji: "😻",
+                                                                            scheduler: Schedule(mon: false,
+                                                                                                tue: false,
+                                                                                                wed: false,
+                                                                                                thu: false,
+                                                                                                fri: false,
+                                                                                                sat: false,
+                                                                                                sun: true)
+                                                                           )
+                                                                    ]
+                                                         )
+                                         ]
     var completedTrackers: [TrackerRecord] = []
     
     private lazy var label: UILabel = {
@@ -73,6 +115,20 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .white
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(TrackerCell.self, forCellWithReuseIdentifier: TrackerCell.identifier)
+        collectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.identifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         alertPresenter = AlertPresenter(viewController: self)
@@ -80,8 +136,13 @@ final class TrackersViewController: UIViewController {
         addDatePicker(datePicker: datePicker)
         addPlusBtn(button: plusBtn)
         addTextField(textField: textField)
-        addImage(imageView: imageView)
-        addEmptyLabel(label: emptyLabel)
+        if categories.isEmpty {
+            addImage(imageView: imageView)
+            addEmptyLabel(label: emptyLabel)
+        } else {
+            addCollectionView(collection: collectionView)
+        }
+        
     }
     
     private func addLabel(label: UILabel) {
@@ -136,6 +197,14 @@ final class TrackersViewController: UIViewController {
         print("Выбранная дата: \(formattedDate)")
     }
     
+    private func addCollectionView(collection: UICollectionView) {
+        view.addSubview(collection)
+        NSLayoutConstraint.activate([collection.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+                                     collection.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                                     collection.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 170),
+                                     collection.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: 0)])
+    }
+    
     @objc
     private func didTapButton() {
         let vc = AdditionViewComtroller()
@@ -157,5 +226,41 @@ final class TrackersViewController: UIViewController {
             self.alertPresenter?.showAlert(for: alertModel)
         }
     }
+    
+}
 
+extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    // MARK: - UICollectionViewDataSource
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return categories.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return categories[section].trackers.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as! TrackerCell
+        let item = categories[indexPath.section].trackers[indexPath.item]
+        cell.configure(with: item)
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as! HeaderView
+        header.configure(with: categories[indexPath.section].name)
+        return header
+    }
+    
+    // MARK: - UICollectionViewDelegateFlowLayout
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = (collectionView.frame.width - 12) / 2
+        return CGSize(width: width, height: width)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 50)
+    }
 }

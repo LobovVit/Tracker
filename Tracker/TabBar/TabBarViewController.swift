@@ -23,6 +23,7 @@ final class TabBarViewController: UITabBarController {
             selectedImage: nil
         )
         self.viewControllers = [trackerViewController, statsViewController]
-        self.tabBar.layer.borderWidth = 1
+        self.tabBar.layer.borderWidth = 0.5
+        self.tabBar.backgroundColor = .white
     }
 }

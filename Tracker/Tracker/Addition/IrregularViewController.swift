@@ -11,6 +11,19 @@ final class IrregularViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
     
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .white
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(ItemCell.self, forCellWithReuseIdentifier: ItemCell.identifier)
+        collectionView.register(HeaderView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderView.identifier)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
+    
     private lazy var label: UILabel = {
         let label = UILabel()
         label.text = "Новое нерегулярное событие"
@@ -18,6 +31,18 @@ final class IrregularViewController: UIViewController {
         label.font = .systemFont(ofSize: .init(22), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        return scrollView
+    }()
+    
+    private lazy var contentView: UIView = {
+        let contentView = UIView()
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        return contentView
     }()
     
     private lazy var warningLabel: UILabel = {
@@ -103,12 +128,14 @@ final class IrregularViewController: UIViewController {
         super.viewDidLoad()
         alertPresenter = AlertPresenter(viewController: self)
         view.backgroundColor = .white
+        addScrollView(scrollView: scrollView, contentView: contentView)
         addNameTextField(textField: nameTextField)
         addLabel(label: label)
         addWarningLabel(label: warningLabel)
         addSaveBtn(button: saveBtn)
         addCancelBtn(button: cancelBtn)
         addCategoryBtn(button: categoryBtn)
+        addCollectionView(collection: collectionView)
     }
     
     @objc
@@ -141,16 +168,41 @@ final class IrregularViewController: UIViewController {
         }
     }
     
+    private func addCollectionView(collection: UICollectionView) {
+        scrollView.addSubview(collection)
+        NSLayoutConstraint.activate([collection.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor, constant: 20),
+                                     collection.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor, constant: -20),
+                                     collection.topAnchor.constraint(equalTo: scrollView.topAnchor, constant: 160),
+                                     collection.heightAnchor.constraint(equalToConstant: 450),
+                                     collection.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor, constant: 0)])
+    }
+    
     private func addLabel(label: UILabel) {
         view.addSubview(label)
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50)])
     }
     
+    private func addScrollView(scrollView: UIScrollView, contentView: UIView) {
+        view.addSubview(scrollView)
+        NSLayoutConstraint.activate([scrollView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: 0),
+                                     scrollView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 0),
+                                     scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
+                                     scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -100)])
+        scrollView.addSubview(contentView)
+        NSLayoutConstraint.activate([
+                    contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+                    contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+                    contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+                    contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+                    contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor)
+                ])
+    }
+    
     private func addWarningLabel(label: UILabel) {
-        view.addSubview(label)
-        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                                     label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 160)])
+        contentView.addSubview(label)
+        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: contentView.centerXAnchor, constant: 0),
+                                     label.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 60)])
     }
     
     private func addSaveBtn(button: UIButton) {
@@ -170,18 +222,18 @@ final class IrregularViewController: UIViewController {
     }
     
     private func addNameTextField(textField: UITextField) {
-        self.view.addSubview(textField)
-        NSLayoutConstraint.activate([textField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-                                     textField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-                                     textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
+        contentView.addSubview(textField)
+        NSLayoutConstraint.activate([textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                                     textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                                     textField.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 0),
                                      textField.heightAnchor.constraint(equalToConstant: 60)])
     }
     
     private func addCategoryBtn(button: UIButton) {
-        self.view.addSubview(button)
-        NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-                                     button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-                                     button.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 190),
+        contentView.addSubview(button)
+        NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+                                     button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
+                                     button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 90),
                                      button.heightAnchor.constraint(equalToConstant: 60)])
     }
     
@@ -198,5 +250,41 @@ final class IrregularViewController: UIViewController {
         }
     }
     
+}
+
+extension IrregularViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+    
+    // MARK: - UICollectionViewDataSource
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return sections.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return sections[section].items.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItemCell.identifier, for: indexPath) as! ItemCell
+        let item = sections[indexPath.section].items[indexPath.item]
+        cell.configure(with: item)
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as! HeaderView
+        header.configure(with: sections[indexPath.section].title)
+        return header
+    }
+
+    // MARK: - UICollectionViewDelegateFlowLayout
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = (collectionView.frame.width - 32) / 7
+        return CGSize(width: width, height: width)
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: 50)
+    }
 }
 

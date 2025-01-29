@@ -4,13 +4,14 @@
 //
 //  Created by Vitaly Lobov on 25.12.2024.
 //
-import SwiftUI
+
+import UIKit
 
 struct Tracker {
     let id: UUID
     let name: String
     let color: UIColor
-    let image: Image
+    let emoji: String
     let scheduler: Schedule
 }
 
