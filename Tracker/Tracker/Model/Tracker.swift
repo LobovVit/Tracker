@@ -12,15 +12,53 @@ struct Tracker {
     let name: String
     let color: UIColor
     let emoji: String
-    let scheduler: Schedule
+    let scheduler: [DayOfWeek]
 }
 
-struct Schedule {
-    let mon: Bool
-    let tue: Bool
-    let wed: Bool
-    let thu: Bool
-    let fri: Bool
-    let sat: Bool
-    let sun: Bool
+enum DayOfWeek: String {
+    case mon = "Понедельник"
+    case tue = "Вторник"
+    case wed = "Среда"
+    case thu = "Четверг"
+    case fri = "Пятница"
+    case sat = "Суббота"
+    case sun = "Воскресенье"
+    var shortWeekDay: String {
+        switch self {
+        case .mon: return "Пн"
+        case .tue: return "Вт"
+        case .wed: return "Ср"
+        case .thu: return "Чт"
+        case .fri: return "Пт"
+        case .sat: return "Сб"
+        case .sun: return "Вс"
+        }
+    }
+    static func getDay(number: Int) -> String {
+        switch number {
+        case 1: return DayOfWeek.mon.rawValue
+        case 2: return DayOfWeek.tue.rawValue
+        case 3: return DayOfWeek.wed.rawValue
+        case 4: return DayOfWeek.thu.rawValue
+        case 5: return DayOfWeek.fri.rawValue
+        case 6: return DayOfWeek.sat.rawValue
+        case 7: return DayOfWeek.sun.rawValue
+        default: return ""
+        }
+    }
+    
+    static func getDayEnum(number: Int) -> DayOfWeek? {
+        switch number {
+        case 1: return DayOfWeek.mon
+        case 2: return DayOfWeek.tue
+        case 3: return DayOfWeek.wed
+        case 4: return DayOfWeek.thu
+        case 5: return DayOfWeek.fri
+        case 6: return DayOfWeek.sat
+        case 7: return DayOfWeek.sun
+        default: return nil
+        }
+    }
 }
+
+extension DayOfWeek: CaseIterable {}

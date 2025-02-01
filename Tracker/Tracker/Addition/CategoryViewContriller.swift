@@ -7,11 +7,14 @@
 
 import UIKit
 
+protocol CategoryViewControllerDelegate: AnyObject {
+    func didSaveCategory(_ category: String)
+}
+
 final class CategoryViewController: UIViewController {
     
-    private var alertPresenter: AlertPresenting?
-    
-    var categoryName: String?
+    private var categoryName: String?
+    weak var delegate: CategoryViewControllerDelegate?
     
     init(categoryName: String? = nil) {
         self.categoryName = categoryName
@@ -77,7 +80,6 @@ final class CategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        alertPresenter = AlertPresenter(viewController: self)
         view.backgroundColor = .white
         addLabel(label: label)
         addOkBtn(button: okBtn)
@@ -86,20 +88,7 @@ final class CategoryViewController: UIViewController {
     
     @objc
     private func didTapOk() {
-        showAlert(message: "Катеория добавлена")
-    }
-    
-    private func showAlert(message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let alertModel = AlertModel(
-                title: message,
-                message: message,
-                buttonText: "Да",
-                completion: { self.dismiss(animated: true) }
-            )
-            self.alertPresenter?.showAlert(for: alertModel)
-        }
+        delegate?.didSaveCategory(nameTextField.text ?? "")
     }
     
     private func addLabel(label: UILabel) {

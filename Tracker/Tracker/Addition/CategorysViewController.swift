@@ -7,12 +7,18 @@
 
 import UIKit
 
+protocol CategorysViewControllerDelegate: AnyObject {
+    func didUpdateCategory(_ category: String?)
+}
+
 final class CategorysViewController: UIViewController {
     
-    private var alertPresenter: AlertPresenting?
+    private var items: [String] = []
+    private var selectedIndex: Int? = nil
     
-    var items = ["Option 1", "Option 2", "Option 3", "Option 4"]
-    var selectedIndex: Int? = nil
+    weak var delegate: CategorysViewControllerDelegate?
+    
+    private var categoryName: String?
     
     private lazy var label: UILabel = {
         let label = UILabel()
@@ -49,31 +55,34 @@ final class CategorysViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        alertPresenter = AlertPresenter(viewController: self)
         view.backgroundColor = .white
         addLabel(label: label)
         addAdditionBtn(button: additionBtn)
         addTableView(tableView: tableView)
     }
     
+    init(categorys: [String], category: String?) {
+        items = categorys
+        if let category {
+            selectedIndex = items.firstIndex(where: { $0 == category })
+        } else {
+            selectedIndex = nil
+        }
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     @objc
     private func didTapAddition() {
         let vc = CategoryViewController()
+        vc.delegate = self
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
-    }
-    
-    private func showAlert(message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let alertModel = AlertModel(
-                title: message,
-                message: message,
-                buttonText: "Да",
-                completion: { self.dismiss(animated: true) }
-            )
-            self.alertPresenter?.showAlert(for: alertModel)
-        }
+        items.append(UUID().uuidString)
+        tableView.reloadData()
     }
     
     private func addLabel(label: UILabel) {
@@ -129,7 +138,9 @@ extension CategorysViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         selectedIndex = indexPath.row
-        tableView.reloadData()
+        categoryName = items[indexPath.row]
+        delegate?.didUpdateCategory(categoryName)
+        dismiss(animated: true, completion: nil)
     }
 }
 
@@ -172,5 +183,18 @@ extension CategorysViewController: UIContextMenuInteractionDelegate {
         }
         
         return UIMenu(title: "Options", children: [editAction, deleteAction])
+    }
+    
+    func loadSelectedCategory(from categoryName: String?) {
+        self.categoryName = categoryName
+    }
+}
+
+extension CategorysViewController: CategoryViewControllerDelegate {
+    func didSaveCategory(_ category: String) {
+        dismiss(animated: true)
+        items.append(category)
+        selectedIndex = items.firstIndex(where: { $0 == category })
+        tableView.reloadData()
     }
 }

@@ -10,50 +10,11 @@ import UIKit
 final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
-    var categories: [TrackerCategory] = [TrackerCategory(name: "Моя Категория",
-                                                         trackers: [Tracker(id: UUID.init(),
-                                                                            name: "Google1",
-                                                                            color: .C_1,
-                                                                            emoji: "😻",
-                                                                            scheduler: Schedule(mon: false,
-                                                                                                tue: false,
-                                                                                                wed: false,
-                                                                                                thu: false,
-                                                                                                fri: false,
-                                                                                                sat: false,
-                                                                                                sun: true)
-                                                                           ),
-                                                                    Tracker(id: UUID.init(),
-                                                                                       name: "Google1",
-                                                                                       color: .C_3,
-                                                                                       emoji: "😻",
-                                                                                       scheduler: Schedule(mon: false,
-                                                                                                           tue: false,
-                                                                                                           wed: false,
-                                                                                                           thu: false,
-                                                                                                           fri: false,
-                                                                                                           sat: false,
-                                                                                                           sun: true)
-                                                                             )
-                                                                    ]
-                                                        ),
-                                         TrackerCategory(name: "Не моя категория",
-                                                         trackers: [Tracker(id: UUID.init(),
-                                                                            name: "Google3",
-                                                                            color: .C_2,
-                                                                            emoji: "😻",
-                                                                            scheduler: Schedule(mon: false,
-                                                                                                tue: false,
-                                                                                                wed: false,
-                                                                                                thu: false,
-                                                                                                fri: false,
-                                                                                                sat: false,
-                                                                                                sun: true)
-                                                                           )
-                                                                    ]
-                                                         )
-                                         ]
-    var completedTrackers: [TrackerRecord] = []
+    private var categories: [TrackerCategory] = MockData.mockData
+    private var completedTrackers: [TrackerRecord] = []
+    private var filteredCategories: [TrackerCategory] = []
+    private var trackers: [Tracker] = []
+    private var currentDate: Date = Date()
     
     private lazy var label: UILabel = {
         let label = UILabel()
@@ -115,6 +76,24 @@ final class TrackersViewController: UIViewController {
         return label
     }()
     
+    private lazy var errorImage: UIImageView = {
+        let errorImage = UIImageView()
+        errorImage.image = UIImage(named: "Error")
+        errorImage.translatesAutoresizingMaskIntoConstraints = false
+        return errorImage
+    }()
+    
+    private lazy var errorLabel: UILabel = {
+        let descriptionLabel = UILabel()
+        descriptionLabel.text = "Ничего не найдено"
+        descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
+        descriptionLabel.textColor = .black
+        descriptionLabel.numberOfLines = 2
+        descriptionLabel.textAlignment = .center
+        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+        return descriptionLabel
+    }()
+    
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
@@ -142,8 +121,36 @@ final class TrackersViewController: UIViewController {
         } else {
             addCollectionView(collection: collectionView)
         }
+        addErr(label: errorLabel, image: errorImage)
+        updateVisible()
         
     }
+    
+    private func showAlert(message: String) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            let alertModel = AlertModel(
+                title: message,
+                message: message,
+                buttonText: "Ок",
+                completion: {  } //self.dismiss(animated: true)
+            )
+            self.alertPresenter?.showAlert(for: alertModel)
+        }
+    }
+    
+    private func addErr(label: UILabel,image: UIImageView) {
+        view.addSubview(label)
+        view.addSubview(image)
+        NSLayoutConstraint.activate([
+            errorImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
+            errorImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            errorLabel.topAnchor.constraint(equalTo: errorImage.bottomAnchor, constant: 8),
+            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+        ])
+    }
+
     
     private func addLabel(label: UILabel) {
         view.addSubview(label)
@@ -190,11 +197,44 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
-        let selectedDate = sender.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        let formattedDate = dateFormatter.string(from: selectedDate)
-        print("Выбранная дата: \(formattedDate)")
+        currentDate = sender.date
+        updateVisible()
+    }
+    
+    private func updateVisible() {
+        let calendar = Calendar.current
+        let selectedDayIndex = calendar.component(.weekday, from: currentDate)
+        guard let selectedWeekDay = DayOfWeek.getDayEnum(number: selectedDayIndex) else { return }
+        
+        filteredCategories = categories.compactMap { category in
+            let trackers = category.trackers.filter { tracker in
+                if tracker.scheduler.isEmpty {
+                    return true
+                } else {
+                    let containsWeekDay = tracker.scheduler.contains { weekDay in
+                        weekDay == selectedWeekDay
+                    }
+                    return containsWeekDay
+                }
+            }
+            if trackers.isEmpty { return nil }
+            return TrackerCategory(
+                name: category.name,
+                trackers: trackers
+            )
+        }
+        if filteredCategories.isEmpty {
+            showErrorImage(true)
+        } else {
+            showErrorImage(false)
+        }
+        collectionView.reloadData()
+    }
+    
+    private func showErrorImage(_ show: Bool) {
+        collectionView.isHidden = show
+        errorImage.isHidden = !show
+        errorLabel.isHidden = !show
     }
     
     private func addCollectionView(collection: UICollectionView) {
@@ -208,23 +248,9 @@ final class TrackersViewController: UIViewController {
     @objc
     private func didTapButton() {
         let vc = AdditionViewComtroller()
+        vc.saveTrackerDelegate = self
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
-    }
-    
-    private func showAlert() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let alertModel = AlertModel(
-                title: "Что то добавить?",
-                message: "Что то добавить?",
-                buttonText: "Да",
-                completion: { self.dismiss(animated: true) },
-                secondButtonText: "Нет",
-                secondCompletion: { self.dismiss(animated: true) }
-            )
-            self.alertPresenter?.showAlert(for: alertModel)
-        }
     }
     
 }
@@ -234,17 +260,21 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     // MARK: - UICollectionViewDataSource
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return categories.count
+        return filteredCategories.count
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return categories[section].trackers.count
+        return filteredCategories[section].trackers.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as! TrackerCell
-        let item = categories[indexPath.section].trackers[indexPath.item]
-        cell.configure(with: item)
+        let item = filteredCategories[indexPath.section].trackers[indexPath.item]
+        
+        let completedDay = completedTrackers.filter{ $0.id == item.id }.count
+        let isCompletedToday = isTrackerCompletedToday(id: item.id)
+        cell.delegate = self
+        cell.configure(with: item, completedDay: completedDay, isCompletedToday: isCompletedToday, indexPath: indexPath)
         return cell
     }
     
@@ -254,7 +284,19 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         return header
     }
     
+    private func isTrackerCompletedToday(id: UUID) -> Bool {
+        completedTrackers.contains { trackerRecord in
+            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+    }
+    
+    private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
+        let isSomeDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
+        return trackerRecord.id == id && isSomeDay
+    }
+    
     // MARK: - UICollectionViewDelegateFlowLayout
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = (collectionView.frame.width - 12) / 2
         return CGSize(width: width, height: width)
@@ -262,5 +304,51 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 50)
+    }
+}
+
+
+extension TrackersViewController: SaveTrackerDelegate {
+    func didSaveTracker(_ tracker: Tracker, _ category: String) {
+        dismiss(animated: true)
+        guard let index = categories.firstIndex(where: { $0.name == category } ) else {
+            return
+        }
+        let updatedCategory = TrackerCategory(
+            name: category,
+            trackers: categories[index].trackers + [tracker]
+        )
+        categories[index] = updatedCategory
+        updateVisible()
+        collectionView.reloadData()
+    }
+    
+    func didTapCancelButton() {
+        dismiss(animated: true)
+    }
+    
+    func getCategorys() -> [String] {
+        return categories.map { $0.name }
+    }
+}
+
+extension TrackersViewController: TrackerCellDelegate {
+    func completeTracker(id: UUID, at indexPath: IndexPath) {
+        let todayDate = Date()
+        guard datePicker.date <= todayDate else {
+            showAlert(message: "Нельзя отметить трекер для будущей даты \(datePicker.date)")
+            return
+        }
+        
+        let trackerRecord = TrackerRecord(id: id, date: datePicker.date)
+        completedTrackers.append(trackerRecord)
+        collectionView.reloadItems(at: [indexPath])
+    }
+    
+    func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        completedTrackers.removeAll() { trackerRecord in
+            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        }
+        collectionView.reloadItems(at: [indexPath])
     }
 }

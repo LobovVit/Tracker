@@ -9,7 +9,7 @@ import UIKit
 
 final class AdditionViewComtroller: UIViewController {
     
-    private var alertPresenter: AlertPresenting?
+    weak var saveTrackerDelegate: SaveTrackerDelegate?
     
     private lazy var newHabitBtn: UIButton = {
         let button = UIButton()
@@ -48,7 +48,6 @@ final class AdditionViewComtroller: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        alertPresenter = AlertPresenter(viewController: self)
         view.backgroundColor = .white
         addHabitBtn(button: newHabitBtn)
         addIrregularBtn(button: newIrregularBtn)
@@ -57,29 +56,18 @@ final class AdditionViewComtroller: UIViewController {
     
     @objc
     private func didTapNewHabit() {
-        let vc = HabitViewController()
+        let vc = NewTrackerViewController(type: .habit, item: nil, category: nil)
+        vc.saveTrackerDelegate = saveTrackerDelegate
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
     }
     
     @objc
     private func didTapNewIrregularBtn() {
-        let vc = IrregularViewController()
+        let vc = NewTrackerViewController(type: .irregular, item: nil, category: nil)
+        vc.saveTrackerDelegate = saveTrackerDelegate
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
-    }
-    
-    private func showAlert(message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let alertModel = AlertModel(
-                title: message,
-                message: message,
-                buttonText: "Да",
-                completion: { self.dismiss(animated: true) }
-            )
-            self.alertPresenter?.showAlert(for: alertModel)
-        }
     }
     
     private func addHabitBtn(button: UIButton) {

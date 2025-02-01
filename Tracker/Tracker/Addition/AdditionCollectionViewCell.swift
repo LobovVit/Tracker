@@ -7,52 +7,87 @@
 
 import UIKit
 
-final class ItemCell: UICollectionViewCell {
-    static let identifier = "ItemCell"
+class ColorCell: UICollectionViewCell {
+    static let reuseIdentifier = "ColorCell"
     
-    private let imageView: UILabel = {
-        let imageView = UILabel()
-        imageView.textAlignment = .center
-        imageView.font = .systemFont(ofSize: 34)
-        return imageView
+    private lazy var colorView: UIView = {
+        let view = UIView()
+        view.layer.cornerRadius = 8
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
-
-    private let nameLabel: UILabel = {
-        let label = UILabel()
-        label.font = .systemFont(ofSize: 14)
-        label.textAlignment = .center
-        return label
-    }()
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        contentView.addSubview(imageView)
-        contentView.addSubview(nameLabel)
+        setupViews()
+        setupConstraints()
+    }
+    
+    private func setupViews() {
+        contentView.addSubview(colorView)
         contentView.layer.cornerRadius = 8
         contentView.layer.masksToBounds = true
-
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
-
+    }
+    
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            imageView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 40),
-            imageView.heightAnchor.constraint(equalToConstant: 40),
-
-            nameLabel.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8),
-            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
+            colorView.widthAnchor.constraint(equalToConstant: 36),
+            colorView.heightAnchor.constraint(equalToConstant: 36),
+            colorView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            colorView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    func configure(with item: Item) {
-        imageView.text = item.icon
-        nameLabel.text = item.name
-        contentView.backgroundColor = item.color ?? UIColor.clear// lightGray.withAlphaComponent(0.3)
+    
+    func configure(with color: UIColor, isSelected: Bool) {
+        colorView.backgroundColor = color
+        contentView.layer.borderWidth = isSelected ? 3 : 0
+        contentView.layer.borderColor = isSelected ? color.withAlphaComponent(0.3).cgColor : nil
+        contentView.layer.cornerRadius = isSelected ? 8 : 0
+        contentView.layer.masksToBounds = isSelected
     }
 }
+
+class EmojiCell: UICollectionViewCell {
+    static let reuseIdentifier = "EmojiCell"
+    
+    private lazy var emojiLabel: UILabel = {
+        let label = UILabel()
+        label.textAlignment = .center
+        label.font = .systemFont(ofSize: 32, weight: .bold)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+        setupConstraints()
+    }
+    
+    private func setupViews() {
+        contentView.addSubview(emojiLabel)
+        contentView.layer.cornerRadius = 16
+        contentView.layer.masksToBounds = true
+    }
+    
+    private func setupConstraints() {
+        NSLayoutConstraint.activate([
+            emojiLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            emojiLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure(with emoji: String, isSelected: Bool) {
+        emojiLabel.text = emoji
+        contentView.backgroundColor = isSelected ? .lightGray : .clear
+    }
+}
+

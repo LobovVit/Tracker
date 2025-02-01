@@ -7,9 +7,16 @@
 
 import UIKit
 
+protocol ScheduleViewControllerDelegate: AnyObject {
+    func didUpdateSchedule(_ schedule: [DayOfWeek?])
+}
+
 final class SceduleViewController: UIViewController {
     
-    private var alertPresenter: AlertPresenting?
+    weak var delegate: ScheduleViewControllerDelegate?
+    
+    private var schedule: [DayOfWeek?] = []
+    private var tmpSchedule: [DayOfWeek: Bool] = [:]
     
     private lazy var label: UILabel = {
         let label = UILabel()
@@ -36,7 +43,6 @@ final class SceduleViewController: UIViewController {
     
     private lazy var monLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Понедельник"
         label.textAlignment = .left
         label.layer.cornerRadius = 15
         label.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
@@ -53,14 +59,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var monFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "monFlag"
+        flag.isOn = schedule.contains(.mon)
+        tmpSchedule[.mon] = flag.isOn
+        flag.addTarget(self, action: #selector(monFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var tueLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Вторник"
         label.textAlignment = .left
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
@@ -74,14 +83,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var tueFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "tueFlag"
+        flag.isOn = schedule.contains(.tue)
+        tmpSchedule[.tue] = flag.isOn
+        flag.addTarget(self, action: #selector(tueFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var wedLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Среда"
         label.textAlignment = .left
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
@@ -95,14 +107,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var wedFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "wedFlag"
+        flag.isOn = schedule.contains(.wed)
+        tmpSchedule[.wed] = flag.isOn
+        flag.addTarget(self, action: #selector(wedFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var thuLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Четверг"
         label.textAlignment = .left
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
@@ -116,14 +131,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var thuFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "thuFlag"
+        flag.isOn = schedule.contains(.thu)
+        tmpSchedule[.thu] = flag.isOn
+        flag.addTarget(self, action: #selector(thuFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var friLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Пятница"
         label.textAlignment = .left
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
@@ -137,14 +155,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var friFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "friFlag"
+        flag.isOn = schedule.contains(.fri)
+        tmpSchedule[.fri] = flag.isOn
+        flag.addTarget(self, action: #selector(friFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var satLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Суббота"
         label.textAlignment = .left
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
@@ -158,14 +179,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var satFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "satFlag"
+        flag.isOn = schedule.contains(.sat)
+        tmpSchedule[.sat] = flag.isOn
+        flag.addTarget(self, action: #selector(satFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     private lazy var sunLabel: UILabel = {
         let label = UILabel()
-        label.text = "  Воскресенье"
         label.textAlignment = .left
         label.layer.cornerRadius = 15
         label.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
@@ -182,14 +206,17 @@ final class SceduleViewController: UIViewController {
     
     private lazy var sunFlag: UISwitch = {
         let flag = UISwitch()
+        flag.onTintColor = .systemBlue
         flag.translatesAutoresizingMaskIntoConstraints = false
         flag.accessibilityIdentifier = "sunFlag"
+        flag.isOn = schedule.contains(.sun)
+        tmpSchedule[.sun] = flag.isOn
+        flag.addTarget(self, action: #selector(sunFlagChanged(_:)), for: .valueChanged)
         return flag
     }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        alertPresenter = AlertPresenter(viewController: self)
         view.backgroundColor = .white
         addLabel(label: label)
         addSaveBtn(button: saveBtn)
@@ -204,20 +231,15 @@ final class SceduleViewController: UIViewController {
     
     @objc
     private func didTapSave() {
-        showAlert(message: "Готово")
-    }
-    
-    private func showAlert(message: String) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
-            let alertModel = AlertModel(
-                title: message,
-                message: message,
-                buttonText: "Да",
-                completion: { self.dismiss(animated: true) }
-            )
-            self.alertPresenter?.showAlert(for: alertModel)
+        schedule.removeAll()
+        for (key, value) in tmpSchedule {
+            print(key.rawValue, value)
+            if value {
+                schedule.append(key)
+            }
         }
+        delegate?.didUpdateSchedule(schedule)
+        dismiss(animated: true, completion: nil)
     }
     
     private func addLabel(label: UILabel) {
@@ -227,7 +249,7 @@ final class SceduleViewController: UIViewController {
     }
     
     private func addSaveBtn(button: UIButton) {
-        self.view.addSubview(button)
+        view.addSubview(button)
         NSLayoutConstraint.activate([button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
                                      button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      button.widthAnchor.constraint(equalToConstant: view.frame.width - 40),
@@ -235,8 +257,10 @@ final class SceduleViewController: UIViewController {
     }
     
     private func addWeekLabel(label: UILabel, flag: UISwitch, idx: Int) {
-        self.view.addSubview(label)
-        self.view.addSubview(flag)
+        label.text = "  " + DayOfWeek.getDay(number: idx)
+        view.addSubview(label)
+        view.addSubview(flag)
+        
         NSLayoutConstraint.activate([label.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
                                      label.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: CGFloat(40 + 60 * idx)),
@@ -244,5 +268,17 @@ final class SceduleViewController: UIViewController {
         NSLayoutConstraint.activate([flag.trailingAnchor.constraint(equalTo: label.trailingAnchor, constant: -20),
                                      flag.centerYAnchor.constraint(equalTo: label.centerYAnchor, constant: 0)])
     }
+    
+    func loadSelectedSchedule(from schedule: [DayOfWeek?]) {
+        self.schedule = schedule
+    }
+    
+    @objc func monFlagChanged(_ sender: UISwitch) { tmpSchedule[.mon] = sender.isOn }
+    @objc func tueFlagChanged(_ sender: UISwitch) { tmpSchedule[.tue] = sender.isOn }
+    @objc func wedFlagChanged(_ sender: UISwitch) { tmpSchedule[.wed] = sender.isOn }
+    @objc func thuFlagChanged(_ sender: UISwitch) { tmpSchedule[.thu] = sender.isOn }
+    @objc func friFlagChanged(_ sender: UISwitch) { tmpSchedule[.fri] = sender.isOn }
+    @objc func satFlagChanged(_ sender: UISwitch) { tmpSchedule[.sat] = sender.isOn }
+    @objc func sunFlagChanged(_ sender: UISwitch) { tmpSchedule[.sun] = sender.isOn }
     
 }
