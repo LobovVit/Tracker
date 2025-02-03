@@ -273,12 +273,12 @@ final class SceduleViewController: UIViewController {
         self.schedule = schedule
     }
     
-    @objc func monFlagChanged(_ sender: UISwitch) { tmpSchedule[.mon] = sender.isOn }
-    @objc func tueFlagChanged(_ sender: UISwitch) { tmpSchedule[.tue] = sender.isOn }
-    @objc func wedFlagChanged(_ sender: UISwitch) { tmpSchedule[.wed] = sender.isOn }
-    @objc func thuFlagChanged(_ sender: UISwitch) { tmpSchedule[.thu] = sender.isOn }
-    @objc func friFlagChanged(_ sender: UISwitch) { tmpSchedule[.fri] = sender.isOn }
-    @objc func satFlagChanged(_ sender: UISwitch) { tmpSchedule[.sat] = sender.isOn }
-    @objc func sunFlagChanged(_ sender: UISwitch) { tmpSchedule[.sun] = sender.isOn }
+    @objc private func monFlagChanged(_ sender: UISwitch) { tmpSchedule[.mon] = sender.isOn }
+    @objc private func tueFlagChanged(_ sender: UISwitch) { tmpSchedule[.tue] = sender.isOn }
+    @objc private func wedFlagChanged(_ sender: UISwitch) { tmpSchedule[.wed] = sender.isOn }
+    @objc private func thuFlagChanged(_ sender: UISwitch) { tmpSchedule[.thu] = sender.isOn }
+    @objc private func friFlagChanged(_ sender: UISwitch) { tmpSchedule[.fri] = sender.isOn }
+    @objc private func satFlagChanged(_ sender: UISwitch) { tmpSchedule[.sat] = sender.isOn }
+    @objc private func sunFlagChanged(_ sender: UISwitch) { tmpSchedule[.sun] = sender.isOn }
     
 }

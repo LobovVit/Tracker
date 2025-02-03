@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class AdditionViewComtroller: UIViewController {
+final class AdditionViewController: UIViewController {
     
     weak var saveTrackerDelegate: SaveTrackerDelegate?
     

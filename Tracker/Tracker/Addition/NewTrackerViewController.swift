@@ -13,10 +13,10 @@ protocol SaveTrackerDelegate: AnyObject {
     func getCategorys() -> [String]
 }
 
-final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate, CategorysViewControllerDelegate {
+final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate, CategoriesViewControllerDelegate {
     
     private var alertPresenter: AlertPresenting?
-    private var typeTracker: AdditionTypes
+    private var typeTracker: AdditionType
     private var tracker: Tracker
     private var trackerCategory: String?
     
@@ -182,7 +182,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         return button
     }()
     
-    init(type: AdditionTypes, item: Tracker?, category: String?) {
+    init(type: AdditionType, item: Tracker?, category: String?) {
         if type == .edit {
             guard let item else { fatalError("edit item cannot be empty") }
             tracker = item
@@ -246,7 +246,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     @objc
     private func didTapCategory() {
-        let vc = CategorysViewController(categorys: saveTrackerDelegate?.getCategorys() ?? [], category: trackerCategory)
+        let vc = CategoriesViewController(categories: saveTrackerDelegate?.getCategorys() ?? [], category: trackerCategory)
         vc.delegate = self
         vc.loadSelectedCategory(from: trackerCategory)
         vc.modalPresentationStyle = .automatic
@@ -254,7 +254,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     }
     
     @objc
-    private func didTapScedule() {
+    private func didTapSchedule() {
         let vc = SceduleViewController()
         vc.delegate = self
         vc.loadSelectedSchedule(from: schedule)

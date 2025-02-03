@@ -9,12 +9,11 @@ import UIKit
 import CoreData
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
-        let viewController = OnboardingVIewController()
+        let viewController = OnboardingViewController()
         window = UIWindow()
         window?.rootViewController = viewController
         window?.makeKeyAndVisible()
@@ -28,7 +27,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             name: "Default Configuration",
             sessionRole: connectingSceneSession.role
         )
-        //sceneConfiguration.delegateClass = SceneDelegate.self
         return sceneConfiguration
     }
 

@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class OnboardingVIewController: UIViewController {
+final class OnboardingViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
     

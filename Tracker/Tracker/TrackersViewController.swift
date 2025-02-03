@@ -223,11 +223,7 @@ final class TrackersViewController: UIViewController {
                 trackers: trackers
             )
         }
-        if filteredCategories.isEmpty {
-            showErrorImage(true)
-        } else {
-            showErrorImage(false)
-        }
+        showErrorImage(filteredCategories.isEmpty)
         collectionView.reloadData()
     }
     
@@ -247,7 +243,7 @@ final class TrackersViewController: UIViewController {
     
     @objc
     private func didTapButton() {
-        let vc = AdditionViewComtroller()
+        let vc = AdditionViewController()
         vc.saveTrackerDelegate = self
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
@@ -268,7 +264,9 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as! TrackerCell
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as? TrackerCell else {
+            fatalError("Unable to dequeue TrackerCell")
+        }
         let item = filteredCategories[indexPath.section].trackers[indexPath.item]
         
         let completedDay = completedTrackers.filter{ $0.id == item.id }.count
@@ -279,7 +277,9 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
-        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as! HeaderView
+        guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as? HeaderView else {
+            fatalError("Unable to dequeue HeaderView")
+        }
         header.configure(with: categories[indexPath.section].name)
         return header
     }

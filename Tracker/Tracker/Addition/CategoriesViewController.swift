@@ -1,5 +1,5 @@
 //
-//  CategorysViewController.swift
+//  CategoriesViewController.swift
 //  Tracker
 //
 //  Created by Vitaly Lobov on 05.01.2025.
@@ -7,16 +7,16 @@
 
 import UIKit
 
-protocol CategorysViewControllerDelegate: AnyObject {
+protocol CategoriesViewControllerDelegate: AnyObject {
     func didUpdateCategory(_ category: String?)
 }
 
-final class CategorysViewController: UIViewController {
+final class CategoriesViewController: UIViewController {
     
     private var items: [String] = []
     private var selectedIndex: Int? = nil
     
-    weak var delegate: CategorysViewControllerDelegate?
+    weak var delegate: CategoriesViewControllerDelegate?
     
     private var categoryName: String?
     
@@ -61,8 +61,8 @@ final class CategorysViewController: UIViewController {
         addTableView(tableView: tableView)
     }
     
-    init(categorys: [String], category: String?) {
-        items = categorys
+    init(categories: [String], category: String?) {
+        items = categories
         if let category {
             selectedIndex = items.firstIndex(where: { $0 == category })
         } else {
@@ -113,7 +113,7 @@ final class CategorysViewController: UIViewController {
     
 }
 
-extension CategorysViewController: UITableViewDataSource, UITableViewDelegate{
+extension CategoriesViewController: UITableViewDataSource, UITableViewDelegate{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return items.count
@@ -122,9 +122,9 @@ extension CategorysViewController: UITableViewDataSource, UITableViewDelegate{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         if cell.interactions.isEmpty {
-                let interaction = UIContextMenuInteraction(delegate: self)
-                cell.addInteraction(interaction)
-            }
+            let interaction = UIContextMenuInteraction(delegate: self)
+            cell.addInteraction(interaction)
+        }
         cell.textLabel?.text = items[indexPath.row]
         cell.backgroundColor = .ypGray
         if indexPath.row == selectedIndex {
@@ -145,7 +145,7 @@ extension CategorysViewController: UITableViewDataSource, UITableViewDelegate{
 }
 
 
-extension CategorysViewController: UIContextMenuInteractionDelegate {
+extension CategoriesViewController: UIContextMenuInteractionDelegate {
     
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         guard let cell = interaction.view as? UITableViewCell,
@@ -159,11 +159,11 @@ extension CategorysViewController: UIContextMenuInteractionDelegate {
     }
     
     private func getTextFromCell(at indexPath: IndexPath) -> String? {
-            guard let cell = tableView.cellForRow(at: indexPath) else {
-                return nil
-            }
-            return cell.textLabel?.text
+        guard let cell = tableView.cellForRow(at: indexPath) else {
+            return nil
         }
+        return cell.textLabel?.text
+    }
     
     func makeContextMenu(forRowAt indexPath: IndexPath) -> UIMenu {
         let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) {  [weak self ] _ in
@@ -190,7 +190,7 @@ extension CategorysViewController: UIContextMenuInteractionDelegate {
     }
 }
 
-extension CategorysViewController: CategoryViewControllerDelegate {
+extension CategoriesViewController: CategoryViewControllerDelegate {
     func didSaveCategory(_ category: String) {
         dismiss(animated: true)
         items.append(category)
