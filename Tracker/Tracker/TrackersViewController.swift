@@ -265,7 +265,8 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as? TrackerCell else {
-            fatalError("Unable to dequeue TrackerCell")
+            assertionFailure("Unable to dequeue TrackerCell")
+            return UICollectionViewCell()
         }
         let item = filteredCategories[indexPath.section].trackers[indexPath.item]
         

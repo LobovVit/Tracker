@@ -15,7 +15,7 @@ struct Tracker {
     let scheduler: [DayOfWeek]
 }
 
-enum DayOfWeek: String {
+enum DayOfWeek: String, Codable {
     case mon = "Понедельник"
     case tue = "Вторник"
     case wed = "Среда"
