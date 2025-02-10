@@ -41,8 +41,6 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         layout.minimumInteritemSpacing = 5
         
         let itemWidth = (UIScreen.main.bounds.width - 106) / 6
-        print (UIScreen.main.bounds.width)
-        print (itemWidth)
         layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
         
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 34)

@@ -26,13 +26,3 @@ extension String {
         return rawValues.compactMap { T(rawValue: $0) }
     }
 }
-
-
-
-
-//let statuses: [TaskStatus] = [.todo, .inProgress]
-//object.statuses = statuses.toJSONString()
-
-
-//let retrievedStatuses: [TaskStatus] = object.statuses?.toEnumArray() ?? []
-//print(retrievedStatuses) // [.todo, .inProgress]

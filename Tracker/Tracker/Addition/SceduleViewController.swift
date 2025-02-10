@@ -233,7 +233,6 @@ final class SceduleViewController: UIViewController {
     private func didTapSave() {
         schedule.removeAll()
         for (key, value) in tmpSchedule {
-            print(key.rawValue, value)
             if value {
                 schedule.append(key)
             }

@@ -19,11 +19,3 @@ extension UIColor {
     }
     
 }
-
-//let color = UIColor.systemBlue
-//object.colorData = color.toData()  // Сохранение цвета в CoreData
-
-
-//if let savedColor = UIColor.from(data: object.colorData) {
-//    view.backgroundColor = savedColor  // Устанавливаем цвет в UI
-//}

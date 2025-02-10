@@ -10,6 +10,7 @@ import UIKit
 final class OnboardingImagesViewController: UIPageViewController, UIPageViewControllerDataSource {
     
     private let images = ["ypBg1", "ypBg2"]
+    private let trackerCategoryStore = TrackerCategoryStore()
     
     private lazy var goBtn: UIButton = {
         let btn = UIButton()
@@ -20,6 +21,18 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         btn.addTarget(self, action: #selector(didTapGoBtn), for: .touchUpInside)
         btn.translatesAutoresizingMaskIntoConstraints = false
         btn.accessibilityIdentifier = "goBtn"
+        return btn
+    }()
+    
+    private lazy var loadBtn: UIButton = {
+        let btn = UIButton()
+        btn.setTitle("очистить БД и загрузить тестовые данные", for: .normal)
+        btn.setTitleColor(.white, for: .normal)
+        btn.backgroundColor = .black
+        btn.layer.cornerRadius = 15
+        btn.addTarget(self, action: #selector(didTapLoadBtn), for: .touchUpInside)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.accessibilityIdentifier = "loadBtn"
         return btn
     }()
     
@@ -41,6 +54,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
         addGoBtn(button: goBtn)
+        addLoadBtn(button: loadBtn)
         addPageControl(pageControl: pageControl)
     }
     
@@ -49,6 +63,20 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         let vc = TabBarViewController()
         vc.modalPresentationStyle = .fullScreen
         present(vc, animated: true)
+    }
+    
+    @objc
+    private func didTapLoadBtn() {
+        trackerCategoryStore.clearCoreData(for: "TrackerCoreData")
+        trackerCategoryStore.clearCoreData(for: "TrackerCategoryCoreData")
+        for tracker in MockData.mockData[...] {
+            do {
+                try trackerCategoryStore.updateTrackerCategory(tracker)
+            } catch {
+                print("ERR: in trackerCategoryStore.addNewTrackerCategory")
+            }
+        }
+        
     }
     
     private func viewControllerForImage(at index: Int) -> UIViewController? {
@@ -74,6 +102,15 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         self.view.addSubview(button)
         NSLayoutConstraint.activate([button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
+                                     button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                                     button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+                                     button.heightAnchor.constraint(equalToConstant: 60)])
+    }
+    
+    private func addLoadBtn(button: UIButton) {
+        self.view.addSubview(button)
+        NSLayoutConstraint.activate([button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
+                                     button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -140),
                                      button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
                                      button.heightAnchor.constraint(equalToConstant: 60)])
