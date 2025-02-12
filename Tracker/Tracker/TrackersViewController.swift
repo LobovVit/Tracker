@@ -121,12 +121,7 @@ final class TrackersViewController: UIViewController {
         addDatePicker(datePicker: datePicker)
         addPlusBtn(button: plusBtn)
         addTextField(textField: textField)
-        if categories.isEmpty {
-            addImage(imageView: imageView)
-            addEmptyLabel(label: emptyLabel)
-        } else {
-            addCollectionView(collection: collectionView)
-        }
+        addCollectionView(collection: collectionView)
         addErr(label: errorLabel, image: errorImage)
         updateVisible()
         
@@ -139,7 +134,7 @@ final class TrackersViewController: UIViewController {
                 title: message,
                 message: message,
                 buttonText: "Ок",
-                completion: {  } //self.dismiss(animated: true)
+                completion: {  } 
             )
             self.alertPresenter?.showAlert(for: alertModel)
         }

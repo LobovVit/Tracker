@@ -37,7 +37,7 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
 
 final class TrackerCategoryStore: NSObject {
     private let context: NSManagedObjectContext
-    private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>!
+    private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>?
     private let trackerStore = TrackerStore()
     
     weak var delegate: TrackerCategoryStoreDelegate?
@@ -48,7 +48,7 @@ final class TrackerCategoryStore: NSObject {
     
     var trackerCategories: [TrackerCategory] {
         guard
-            let objects = self.fetchedResultsController.fetchedObjects,
+            let objects = self.fetchedResultsController?.fetchedObjects,
             let categories = try? objects.map({ try self.trackerCategory(from: $0) })
         else { return [] }
         return categories
@@ -56,7 +56,9 @@ final class TrackerCategoryStore: NSObject {
     
     convenience override init() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            fatalError("AppDelegate could not be cast to expected type.")
+            assertionFailure("AppDelegate could not be cast to expected type.")
+            self.init(context: NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType))
+            return
         }
         let context = appDelegate.persistentContainer.viewContext
         self.init(context: context)
@@ -153,7 +155,7 @@ final class TrackerCategoryStore: NSObject {
     func clearCoreData(for entityName: String) {
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
         let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
+        
         do {
             try context.execute(deleteRequest)
             try context.save()
@@ -172,23 +174,23 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
         updatedIndexes = IndexSet()
         movedIndexes = Set<TrackerCategoryStoreUpdate.Move>()
     }
-
+    
     func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-        delegate?.store(
-            self,
-            didUpdate: TrackerCategoryStoreUpdate(
-                insertedIndexes: insertedIndexes!,
-                deletedIndexes: deletedIndexes!,
-                updatedIndexes: updatedIndexes!,
-                movedIndexes: movedIndexes!
-            )
+        let update = TrackerCategoryStoreUpdate(
+            insertedIndexes: insertedIndexes ?? [],
+            deletedIndexes: deletedIndexes ?? [],
+            updatedIndexes: updatedIndexes ?? [],
+            movedIndexes: movedIndexes ?? []
         )
+        
+        delegate?.store(self, didUpdate: update)
+        
         insertedIndexes = nil
         deletedIndexes = nil
         updatedIndexes = nil
         movedIndexes = nil
     }
-
+    
     func controller(
         _ controller: NSFetchedResultsController<NSFetchRequestResult>,
         didChange anObject: Any,

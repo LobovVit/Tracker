@@ -54,7 +54,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
         addGoBtn(button: goBtn)
-        addLoadBtn(button: loadBtn)
+    //    addLoadBtn(button: loadBtn)
         addPageControl(pageControl: pageControl)
     }
     
@@ -69,13 +69,14 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     private func didTapLoadBtn() {
         trackerCategoryStore.clearCoreData(for: "TrackerCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerCategoryCoreData")
-        for tracker in MockData.mockData[...] {
-            do {
-                try trackerCategoryStore.updateTrackerCategory(tracker)
-            } catch {
-                print("ERR: in trackerCategoryStore.addNewTrackerCategory")
-            }
-        }
+        trackerCategoryStore.clearCoreData(for: "TrackerRecordCodeData")
+//        for tracker in MockData.mockData[...] {
+//            do {
+//                try trackerCategoryStore.updateTrackerCategory(tracker)
+//            } catch {
+//                print("ERR: in trackerCategoryStore.addNewTrackerCategory")
+//            }
+//        }
         
     }
     

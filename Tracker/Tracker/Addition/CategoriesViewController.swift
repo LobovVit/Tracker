@@ -15,6 +15,7 @@ final class CategoriesViewController: UIViewController {
     
     private var items: [String] = []
     private var selectedIndex: Int? = nil
+    private let trackerCategoryStore = TrackerCategoryStore()
     
     weak var delegate: CategoriesViewControllerDelegate?
     
@@ -62,7 +63,8 @@ final class CategoriesViewController: UIViewController {
     }
     
     init(categories: [String], category: String?) {
-        items = categories
+        //items = categories
+        items = trackerCategoryStore.trackerCategories.map { $0.name }.reversed()
         if let category {
             selectedIndex = items.firstIndex(where: { $0 == category })
         } else {
@@ -81,7 +83,6 @@ final class CategoriesViewController: UIViewController {
         vc.delegate = self
         vc.modalPresentationStyle = .automatic
         present(vc, animated: true)
-        items.append(UUID().uuidString)
         tableView.reloadData()
     }
     
@@ -104,7 +105,8 @@ final class CategoriesViewController: UIViewController {
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         self.view.addSubview(tableView)
-        let maxHeight = view.frame.height - 300.0 < CGFloat(items.count) * 60.0 ? view.frame.height - 300.0 : CGFloat(items.count) * 60.0
+        //let maxHeight = view.frame.height - 300.0 < CGFloat(items.count) * 60.0 ? view.frame.height - 300.0 : //CGFloat(items.count) * 60.0
+        let maxHeight = view.frame.height - 300.0
         NSLayoutConstraint.activate([tableView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 90),
                                      tableView.heightAnchor.constraint(equalToConstant: maxHeight),
@@ -193,8 +195,20 @@ extension CategoriesViewController: UIContextMenuInteractionDelegate {
 extension CategoriesViewController: CategoryViewControllerDelegate {
     func didSaveCategory(_ category: String) {
         dismiss(animated: true)
-        items.append(category)
+        do {
+            try trackerCategoryStore.updateTrackerCategory(TrackerCategory(name: category, trackers: []))
+        } catch {
+            print("ERR trackerCategoryStore.addNewTrackerCategory(updatedCategory): \(error)")
+        }
+        items = trackerCategoryStore.trackerCategories.map { $0.name }.reversed()
         selectedIndex = items.firstIndex(where: { $0 == category })
+        tableView.reloadData()
+    }
+}
+
+extension CategoriesViewController: TrackerCategoryStoreDelegate {
+    func store(_ store: TrackerCategoryStore, didUpdate update: TrackerCategoryStoreUpdate) {
+        items = trackerCategoryStore.trackerCategories.map { $0.name }.reversed()
         tableView.reloadData()
     }
 }
