@@ -140,7 +140,11 @@ final class TrackerCategoryStore: NSObject {
             if let existingTrackerCoreData = trackerStore.fetchTrackerCoreData(tracker: tracker) {
                 result.insert(existingTrackerCoreData)
             } else {
-                let newTrackerCoreData = TrackerCoreData(context: trackerCategoryCorData.managedObjectContext!)
+                guard let context = trackerCategoryCorData.managedObjectContext else {
+                    print("ERR: managedObjectContext равен nil")
+                    return
+                }
+                let newTrackerCoreData = TrackerCoreData(context: context)
                 newTrackerCoreData.id = tracker.id
                 newTrackerCoreData.name = tracker.name
                 newTrackerCoreData.color = tracker.color.toData() ?? Data()
