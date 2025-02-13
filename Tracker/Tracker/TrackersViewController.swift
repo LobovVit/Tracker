@@ -10,11 +10,15 @@ import UIKit
 final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
-    private var categories: [TrackerCategory] = MockData.mockData
+    private var categories: [TrackerCategory] = []// = MockData.mockData
     private var completedTrackers: [TrackerRecord] = []
     private var filteredCategories: [TrackerCategory] = []
     private var trackers: [Tracker] = []
     private var currentDate: Date = Date()
+    
+    private let trackerStore = TrackerStore()
+    private let trackerCategoryStore = TrackerCategoryStore()
+    private let trackerRecordStore = TrackerRecordStore()
     
     private lazy var label: UILabel = {
         let label = UILabel()
@@ -111,16 +115,13 @@ final class TrackersViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         alertPresenter = AlertPresenter(viewController: self)
+        trackerCategoryStore.delegate = self
+        categories = trackerCategoryStore.trackerCategories
         addLabel(label: label)
         addDatePicker(datePicker: datePicker)
         addPlusBtn(button: plusBtn)
         addTextField(textField: textField)
-        if categories.isEmpty {
-            addImage(imageView: imageView)
-            addEmptyLabel(label: emptyLabel)
-        } else {
-            addCollectionView(collection: collectionView)
-        }
+        addCollectionView(collection: collectionView)
         addErr(label: errorLabel, image: errorImage)
         updateVisible()
         
@@ -133,7 +134,7 @@ final class TrackersViewController: UIViewController {
                 title: message,
                 message: message,
                 buttonText: "Ок",
-                completion: {  } //self.dismiss(animated: true)
+                completion: {  } 
             )
             self.alertPresenter?.showAlert(for: alertModel)
         }
@@ -265,11 +266,12 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: TrackerCell.identifier, for: indexPath) as? TrackerCell else {
-            fatalError("Unable to dequeue TrackerCell")
+            assertionFailure("Unable to dequeue TrackerCell")
+            return UICollectionViewCell()
         }
         let item = filteredCategories[indexPath.section].trackers[indexPath.item]
         
-        let completedDay = completedTrackers.filter{ $0.id == item.id }.count
+        let completedDay = (try? trackerRecordStore.completedDays(for: item.id).count) ?? 0
         let isCompletedToday = isTrackerCompletedToday(id: item.id)
         cell.delegate = self
         cell.configure(with: item, completedDay: completedDay, isCompletedToday: isCompletedToday, indexPath: indexPath)
@@ -285,14 +287,21 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     }
     
     private func isTrackerCompletedToday(id: UUID) -> Bool {
-        completedTrackers.contains { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        do {
+            let completedDates = try trackerRecordStore.completedDays(for: id)
+            return completedDates.contains { Calendar.current.isDate($0, inSameDayAs: datePicker.date) }
+        } catch {
+            return false
         }
     }
     
     private func isSameTrackerRecord(trackerRecord: TrackerRecord, id: UUID) -> Bool {
-        let isSomeDay = Calendar.current.isDate(trackerRecord.date, inSameDayAs: datePicker.date)
-        return trackerRecord.id == id && isSomeDay
+        do {
+            return try trackerRecordStore.fetchRecord(id: id, date: datePicker.date) != nil
+        } catch {
+            print("Ошибка при проверке записи трекера: \(error)")
+            return false
+        }
     }
     
     // MARK: - UICollectionViewDelegateFlowLayout
@@ -319,6 +328,11 @@ extension TrackersViewController: SaveTrackerDelegate {
             trackers: categories[index].trackers + [tracker]
         )
         categories[index] = updatedCategory
+        do {
+            try trackerCategoryStore.updateTrackerCategory(updatedCategory)
+        } catch {
+            print("ERR trackerCategoryStore.addNewTrackerCategory(updatedCategory): \(error)")
+        }
         updateVisible()
         collectionView.reloadData()
     }
@@ -340,15 +354,28 @@ extension TrackersViewController: TrackerCellDelegate {
             return
         }
         
-        let trackerRecord = TrackerRecord(id: id, date: datePicker.date)
-        completedTrackers.append(trackerRecord)
+        do {
+            try trackerRecordStore.updateRecord(id: id, date: datePicker.date)
+        } catch {
+            print("ERR: trackerRecordStore.updateRecord(id: id, date: datePicker.date): \(error)")
+        }
         collectionView.reloadItems(at: [indexPath])
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
-        completedTrackers.removeAll() { trackerRecord in
-            isSameTrackerRecord(trackerRecord: trackerRecord, id: id)
+        do {
+            try trackerRecordStore.deleteRecord(id: id, date: datePicker.date)
+        } catch {
+            print("ERR: trackerRecordStore.deleteRecord(id: id, date: datePicker.date): \(error)")
         }
         collectionView.reloadItems(at: [indexPath])
+    }
+}
+
+extension TrackersViewController: TrackerCategoryStoreDelegate {
+    func store(_ store: TrackerCategoryStore, didUpdate update: TrackerCategoryStoreUpdate) {
+        categories = trackerCategoryStore.trackerCategories
+        updateVisible()
+        collectionView.reloadData()
     }
 }

@@ -49,7 +49,7 @@ final class MockData {
                         name: "Пить",
                         color: .C_6,
                         emoji: "😪",
-                        scheduler: [.sat]),
+                        scheduler: []),
             ]),
     ]
 }

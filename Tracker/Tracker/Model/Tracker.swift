@@ -15,7 +15,7 @@ struct Tracker {
     let scheduler: [DayOfWeek]
 }
 
-enum DayOfWeek: String {
+enum DayOfWeek: String, Codable {
     case mon = "Понедельник"
     case tue = "Вторник"
     case wed = "Среда"
@@ -49,13 +49,13 @@ enum DayOfWeek: String {
     
     static func getDayEnum(number: Int) -> DayOfWeek? {
         switch number {
-        case 1: return DayOfWeek.mon
-        case 2: return DayOfWeek.tue
-        case 3: return DayOfWeek.wed
-        case 4: return DayOfWeek.thu
-        case 5: return DayOfWeek.fri
-        case 6: return DayOfWeek.sat
-        case 7: return DayOfWeek.sun
+        case 1: return DayOfWeek.sun
+        case 2: return DayOfWeek.mon
+        case 3: return DayOfWeek.tue
+        case 4: return DayOfWeek.wed
+        case 5: return DayOfWeek.thu
+        case 6: return DayOfWeek.fri
+        case 7: return DayOfWeek.sat
         default: return nil
         }
     }

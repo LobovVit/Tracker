@@ -41,8 +41,6 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         layout.minimumInteritemSpacing = 5
         
         let itemWidth = (UIScreen.main.bounds.width - 106) / 6
-        print (UIScreen.main.bounds.width)
-        print (itemWidth)
         layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
         
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 34)
@@ -176,7 +174,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         button.contentHorizontalAlignment = .left
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 5, bottom: 0, right: 0)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: view.frame.width - 80, bottom: 0, right: 0)
-        button.addTarget(self, action: #selector(didTapScedule), for: .touchUpInside)
+        button.addTarget(self, action: #selector(didTapSchedule), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityIdentifier = "sceduleBtn"
         return button
@@ -413,13 +411,15 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.reuseIdentifier, for: indexPath) as? EmojiCell else {
-                fatalError("Unable to dequeue EmojiCell")
+                assertionFailure("Unable to dequeue EmojiCell")
+                return UICollectionViewCell()
             }
             cell.configure(with: emojis[indexPath.item], isSelected: indexPath == selectedEmojiIndex)
             return cell
         } else {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ColorCell.reuseIdentifier, for: indexPath) as? ColorCell else {
-                fatalError("Unable to dequeue ColorCell")
+                assertionFailure("Unable to dequeue ColorCell")
+                return UICollectionViewCell()
             }
             cell.configure(with: colors[indexPath.item], isSelected: indexPath == selectedColorIndex)
             return cell
