@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 protocol SaveTrackerDelegate: AnyObject {
     func didSaveTracker(_ tracker: Tracker, _ category: String)
@@ -13,7 +14,7 @@ protocol SaveTrackerDelegate: AnyObject {
     func getCategorys() -> [String]
 }
 
-final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate, CategoriesViewControllerDelegate {
+final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate {
     
     private var alertPresenter: AlertPresenting?
     private var typeTracker: AdditionType
@@ -44,7 +45,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
         
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 34)
-
+        
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = false
         collectionView.backgroundColor = .white
@@ -242,13 +243,22 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         saveTrackerDelegate?.didTapCancelButton()
     }
     
-    @objc
-    private func didTapCategory() {
-        let vc = CategoriesViewController(categories: saveTrackerDelegate?.getCategorys() ?? [], category: trackerCategory)
-        vc.delegate = self
-        vc.loadSelectedCategory(from: trackerCategory)
-        vc.modalPresentationStyle = .automatic
-        present(vc, animated: true)
+    @objc private func didTapCategory() {
+        let store = TrackerCategoryStore()
+        let viewModel = TrackerCategoryViewModel(categoryStore: store)
+        
+        let swiftUIView = TrackerCategoryView(
+            viewModel: viewModel,
+            trackerCategory: .constant(trackerCategory),
+            onCategorySelected: { [weak self] category in
+                self?.trackerCategory = category.name
+                self?.didUpdateCategory(category.name ?? "Unknown")
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        hostingController.modalPresentationStyle = .formSheet
+        present(hostingController, animated: true)
     }
     
     @objc
@@ -267,7 +277,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
                 title: message,
                 message: message,
                 buttonText: "Ок",
-                completion: {  } 
+                completion: {  }
             )
             self.alertPresenter?.showAlert(for: alertModel)
         }
@@ -403,11 +413,11 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 2
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return section == 0 ? emojis.count : colors.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.reuseIdentifier, for: indexPath) as? EmojiCell else {
@@ -425,7 +435,7 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
             return cell
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader,
               let header = collectionView.dequeueReusableSupplementaryView(
@@ -438,7 +448,7 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
         header.configure(with: indexPath.section == 0 ? "Emoji" : "Цвет")
         return header
     }
-
+    
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
