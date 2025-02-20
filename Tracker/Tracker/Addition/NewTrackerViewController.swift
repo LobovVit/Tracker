@@ -243,7 +243,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         saveTrackerDelegate?.didTapCancelButton()
     }
     
-    @objc private func didTapCategory() {
+    @objc private func didTapCategorySwiftUI() {
         let store = TrackerCategoryStore()
         let viewModel = TrackerCategoryViewModel(categoryStore: store)
         
@@ -259,6 +259,17 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         let hostingController = UIHostingController(rootView: swiftUIView)
         hostingController.modalPresentationStyle = .formSheet
         present(hostingController, animated: true)
+    }
+    
+    @objc
+    private func didTapCategory() {
+        let categoriesVC = CategoriesViewController()
+            categoriesVC.onCategorySelected = { [weak self] selectedCategory in
+                guard let self = self else { return }
+                self.trackerCategory = selectedCategory
+                self.didUpdateCategory(selectedCategory)
+            }
+            present(categoriesVC, animated: true)
     }
     
     @objc
