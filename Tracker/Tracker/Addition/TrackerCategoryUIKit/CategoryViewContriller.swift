@@ -2,22 +2,16 @@
 //  CategoryViewContriller.swift
 //  Tracker
 //
-//  Created by Vitaly Lobov on 06.01.2025.
+//  Created by Vitaly Lobov on 20.02.2025.
 //
 
 import UIKit
 
-protocol CategoryViewControllerDelegate: AnyObject {
-    func didSaveCategory(_ category: String)
-}
-
 final class CategoryViewController: UIViewController {
+    private let viewModel: CategoryViewModel
     
-    private var categoryName: String?
-    weak var delegate: CategoryViewControllerDelegate?
-    
-    init(categoryName: String? = nil) {
-        self.categoryName = categoryName
+    init(viewModel: CategoryViewModel) {
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -27,11 +21,7 @@ final class CategoryViewController: UIViewController {
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        if let categoryName {
-            label.text = "Редактирование категории"
-        } else {
-            label.text = "Новая категория"
-        }
+        label.text = "Новая категория"
         label.textColor = .black
         label.font = .systemFont(ofSize: .init(22), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -42,13 +32,8 @@ final class CategoryViewController: UIViewController {
         let button = UIButton()
         button.setTitle("Готово", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        if let categoryName {
-            button.backgroundColor = .black
-            button.isEnabled = true
-        } else {
-            button.backgroundColor = .gray
-            button.isEnabled = false
-        }
+        button.backgroundColor = .gray
+        button.isEnabled = false
         button.layer.cornerRadius = 15;
         button.addTarget(self, action: #selector(didTapOk), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -58,12 +43,8 @@ final class CategoryViewController: UIViewController {
     
     private lazy var nameTextField: UITextField = {
         let textField = UITextField()
-        textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        if let categoryName {
-            textField.text = categoryName
-        } else {
-            textField.placeholder = "Введите название категории"
-        }
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.placeholder = "Введите название категории"
         textField.layer.cornerRadius = 15;
         textField.layer.masksToBounds = true
         textField.backgroundColor = .ypGray
@@ -80,15 +61,15 @@ final class CategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupUI()
+        bindViewModel()
+    }
+    
+    private func setupUI() {
         view.backgroundColor = .white
         addLabel(label: label)
         addOkBtn(button: okBtn)
         addNameTextField(textField: nameTextField)
-    }
-    
-    @objc
-    private func didTapOk() {
-        delegate?.didSaveCategory(nameTextField.text ?? "")
     }
     
     private func addLabel(label: UILabel) {
@@ -113,16 +94,28 @@ final class CategoryViewController: UIViewController {
                                      textField.heightAnchor.constraint(equalToConstant: 60)])
     }
     
-    @objc private func textFieldDidChange(_ textField: UITextField) {
-        if textField.text?.isEmpty == true {
+    private func bindViewModel() {
+        viewModel.newCategoryNameUpdated = { [weak self] name in
+            self?.okBtn.isEnabled = !(name?.isEmpty ?? true)
+        }
+    }
+    
+    @objc private func textFieldDidChange() {
+        if nameTextField.text?.isEmpty == true {
             okBtn.isEnabled = false
             okBtn.backgroundColor = .gray
         } else {
-            let text = textField.text ?? ""
+            let text = nameTextField.text ?? ""
             okBtn.isEnabled = text.count>0
             okBtn.backgroundColor = text.count>0 ? .black : .gray
             nameTextField.clearButtonMode = text.count>0 ? .whileEditing : .never
         }
+        viewModel.newCategoryName = nameTextField.text
+    }
+    
+    @objc private func didTapOk() {
+        viewModel.addCategory()
+        dismiss(animated: true)
     }
     
 }

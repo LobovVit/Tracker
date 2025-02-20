@@ -18,7 +18,7 @@ final class OnboardingViewController: UIViewController {
             window.rootViewController = tabBarController
         } else {
             OnboardingLaunchedEarlier.shared.didAppStart = true
-            let onboardingImagesViewController = OnboardingImagesViewController()
+            let onboardingImagesViewController = OnboardingImagesViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
             window.rootViewController = onboardingImagesViewController
         }
     }
