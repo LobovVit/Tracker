@@ -37,9 +37,49 @@ final class TrackerStore: NSObject {
         let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
         do {
-            return try context.fetch(fetchRequest).first
+            let fetchedResults = try context.fetch(fetchRequest)
+            return fetchedResults.first
         } catch {
             return nil
+        }
+    }
+    
+    func updateTracker(_ tracker: Tracker, newCategory: String? = nil) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        
+        do {
+            let results = try context.fetch(fetchRequest)
+            let trackerCoreData: TrackerCoreData
+
+            if let existingTracker = results.first {
+                trackerCoreData = existingTracker
+            } else {
+                trackerCoreData = TrackerCoreData(context: context)
+                trackerCoreData.id = tracker.id
+            }
+
+            trackerCoreData.name = tracker.name
+            trackerCoreData.color = tracker.color.toData()
+            trackerCoreData.emoji = tracker.emoji
+            trackerCoreData.scheduler = tracker.scheduler.toJSONString()
+
+            if let newCategoryName = newCategory {
+                let categoryFetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+                categoryFetchRequest.predicate = NSPredicate(format: "name ==[c] %@", newCategoryName.trimmingCharacters(in: .whitespacesAndNewlines))
+
+                let fetchedCategories = try context.fetch(categoryFetchRequest)
+                if let newCategoryCoreData = fetchedCategories.first {
+                    trackerCoreData.category = newCategoryCoreData
+                } else {
+                    let newCategoryCoreData = TrackerCategoryCoreData(context: context)
+                    newCategoryCoreData.name = newCategoryName
+                    trackerCoreData.category = newCategoryCoreData
+                }
+            }
+            try context.save()
+        } catch {
+            print("ERR: Ошибка при сохранении/обновлении трекера:", error)
         }
     }
     

@@ -374,7 +374,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addCategoryBtn(button: DetailButton) {
         contentView.addSubview(button)
-        isEdit ? didUpdateCategory(trackerCategory) : didUpdateCategory("")
+        isEdit ? didUpdateCategory(trackerCategory) : {}()
         NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 90),

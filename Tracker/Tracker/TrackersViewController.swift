@@ -320,19 +320,8 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
 extension TrackersViewController: SaveTrackerDelegate {
     func didSaveTracker(_ tracker: Tracker, _ category: String) {
         dismiss(animated: true)
-        guard let index = categories.firstIndex(where: { $0.name == category } ) else {
-            return
-        }
-        let updatedCategory = TrackerCategory(
-            name: category,
-            trackers: categories[index].trackers + [tracker]
-        )
-        categories[index] = updatedCategory
-        do {
-            try trackerCategoryStore.updateTrackerCategory(updatedCategory)
-        } catch {
-            print("ERR trackerCategoryStore.addNewTrackerCategory(updatedCategory): \(error)")
-        }
+        trackerStore.updateTracker(tracker, newCategory: category)
+        categories = trackerCategoryStore.trackerCategories
         updateVisible()
         collectionView.reloadData()
     }
@@ -402,8 +391,12 @@ extension TrackersViewController: TrackerCellDelegate {
             let vc = NewTrackerViewController(type: .edit, item: tracker, category: category.name)
             vc.saveTrackerDelegate = self
             vc.modalPresentationStyle = .automatic
-            present(vc, animated: true)
-            collectionView.reloadItems(at: [indexPath])
+            present(vc, animated: true) { [weak self] in
+                    DispatchQueue.main.async {
+                        self?.updateVisible()
+                        self?.collectionView.reloadData()
+                    }
+                }
         }
         
         private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
