@@ -55,7 +55,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     }
     
     @objc
-    private func didTapLoadBtn() {
+    func didTapLoadBtn() {
         trackerCategoryStore.clearCoreData(for: "TrackerCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerCategoryCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerRecordCodeData")

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9839FB6F2D6D0A0300ADFFE4 /* InlineSnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 9839FB6E2D6D0A0300ADFFE4 /* InlineSnapshotTesting */; };
+		9839FB712D6D0A0300ADFFE4 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 9839FB702D6D0A0300ADFFE4 /* SnapshotTesting */; };
+		9839FB732D6D0A0300ADFFE4 /* SnapshotTestingCustomDump in Frameworks */ = {isa = PBXBuildFile; productRef = 9839FB722D6D0A0300ADFFE4 /* SnapshotTestingCustomDump */; };
 		98EF04E82D1995FC00151CCD /* ProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 98EF04E72D1995FC00151CCD /* ProgressHUD */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +80,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9839FB732D6D0A0300ADFFE4 /* SnapshotTestingCustomDump in Frameworks */,
+				9839FB6F2D6D0A0300ADFFE4 /* InlineSnapshotTesting in Frameworks */,
+				9839FB712D6D0A0300ADFFE4 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,6 +160,9 @@
 			);
 			name = TrackerTests;
 			packageProductDependencies = (
+				9839FB6E2D6D0A0300ADFFE4 /* InlineSnapshotTesting */,
+				9839FB702D6D0A0300ADFFE4 /* SnapshotTesting */,
+				9839FB722D6D0A0300ADFFE4 /* SnapshotTestingCustomDump */,
 			);
 			productName = TrackerTests;
 			productReference = 98EF04262D18844E00151CCD /* TrackerTests.xctest */;
@@ -216,6 +225,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				98EF04E62D1995FC00151CCD /* XCRemoteSwiftPackageReference "ProgressHUD" */,
+				9839FB6D2D6D0A0300ADFFE4 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 98EF040E2D18844D00151CCD /* Products */;
@@ -588,6 +598,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		9839FB6D2D6D0A0300ADFFE4 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.1;
+			};
+		};
 		98EF04E62D1995FC00151CCD /* XCRemoteSwiftPackageReference "ProgressHUD" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/relatedcode/ProgressHUD";
@@ -599,6 +617,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		9839FB6E2D6D0A0300ADFFE4 /* InlineSnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9839FB6D2D6D0A0300ADFFE4 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = InlineSnapshotTesting;
+		};
+		9839FB702D6D0A0300ADFFE4 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9839FB6D2D6D0A0300ADFFE4 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		9839FB722D6D0A0300ADFFE4 /* SnapshotTestingCustomDump */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9839FB6D2D6D0A0300ADFFE4 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTestingCustomDump;
+		};
 		98EF04E72D1995FC00151CCD /* ProgressHUD */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 98EF04E62D1995FC00151CCD /* XCRemoteSwiftPackageReference "ProgressHUD" */;

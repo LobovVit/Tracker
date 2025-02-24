@@ -5,13 +5,21 @@
 //  Created by Vitaly Lobov on 22.12.2024.
 //
 
-import Testing
+import XCTest
+import SnapshotTesting
 @testable import Tracker
 
-struct TrackerTests {
+final class TrackersViewControllerSnapshotTests: XCTestCase {
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+    func testTrackersViewControllerSnapshot() {
+        let ob = OnboardingImagesViewController()
+        let vc = TrackersViewController()
+        let navController = UINavigationController(rootViewController: vc)
+        ob.didTapLoadBtn()
+        navController.loadViewIfNeeded()
+        navController.view.layoutIfNeeded()
+        withSnapshotTesting {
+            assertSnapshot(of: navController, as: .image, record: false) // Менять `record` на `true`, если нужно обновить снимок
+        }
     }
-
 }
