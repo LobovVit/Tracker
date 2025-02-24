@@ -59,6 +59,15 @@ final class TrackerCell: UICollectionViewCell {
         executeBtn.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return executeBtn
     }()
+    
+    private lazy var isPinnedView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "pin")
+        imageView.tintColor = .white
+        imageView.contentMode = .scaleAspectFit
+        imageView.isHidden = false
+        return imageView
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -67,12 +76,14 @@ final class TrackerCell: UICollectionViewCell {
         contentView.addSubview(nameLabel)
         contentView.addSubview(countLabel)
         contentView.addSubview(executeBtn)
+        contentView.addSubview(isPinnedView)
 
         imageView.translatesAutoresizingMaskIntoConstraints = false
         emojiView.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         executeBtn.translatesAutoresizingMaskIntoConstraints = false
+        isPinnedView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             
@@ -98,6 +109,11 @@ final class TrackerCell: UICollectionViewCell {
             executeBtn.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             executeBtn.widthAnchor.constraint(equalToConstant: 34),
             executeBtn.heightAnchor.constraint(equalToConstant: 34),
+            
+            isPinnedView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            isPinnedView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+            isPinnedView.widthAnchor.constraint(equalToConstant: 20),
+            isPinnedView.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
 
@@ -115,6 +131,7 @@ final class TrackerCell: UICollectionViewCell {
         let word = dayWord(for: completedDay)
         countLabel.text = "\(completedDay) \(word)"
         executeBtn.backgroundColor = item.color
+        isPinnedView.isHidden = !item.isPinned
         if isCompletedToday  {
             executeBtn.setImage(UIImage(named: "Done"), for: .normal)
         } else {

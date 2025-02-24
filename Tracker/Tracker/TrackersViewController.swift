@@ -7,14 +7,22 @@
 
 import UIKit
 
+private enum FilterType {
+    case all
+    case today
+    case completed
+    case uncompleted
+}
+
 final class TrackersViewController: UIViewController {
     
     private var alertPresenter: AlertPresenting?
-    private var categories: [TrackerCategory] = []// = MockData.mockData
+    private var categories: [TrackerCategory] = []
     private var completedTrackers: [TrackerRecord] = []
     private var filteredCategories: [TrackerCategory] = []
     private var trackers: [Tracker] = []
     private var currentDate: Date = Date()
+    private var currentFilter: FilterType = .all
     
     private let trackerStore = TrackerStore()
     private let trackerCategoryStore = TrackerCategoryStore()
@@ -112,6 +120,19 @@ final class TrackersViewController: UIViewController {
         return collectionView
     }()
     
+    private lazy var filterButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Фильтры", for: .normal)
+        button.backgroundColor = .systemBlue
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        button.layer.cornerRadius = 10
+        button.layer.masksToBounds = true
+        button.addTarget(self, action: #selector(didTapFilterButton), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         alertPresenter = AlertPresenter(viewController: self)
@@ -123,8 +144,75 @@ final class TrackersViewController: UIViewController {
         addTextField(textField: textField)
         addCollectionView(collection: collectionView)
         addErr(label: errorLabel, image: errorImage)
+        addFilterButton()
         updateVisible()
         
+    }
+    
+    private func addFilterButton() {
+        view.addSubview(filterButton)
+        
+        NSLayoutConstraint.activate([
+            filterButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10),
+            filterButton.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
+            filterButton.heightAnchor.constraint(equalToConstant: 44),
+            filterButton.widthAnchor.constraint(equalToConstant: 80)
+        ])
+    }
+    
+    @objc private func didTapFilterButton() {
+        let alert = UIAlertController(title: "Фильтры", message: nil, preferredStyle: .actionSheet)
+
+        let titleFont = UIFont.systemFont(ofSize: 20, weight: .bold)
+        let titleAttributes: [NSAttributedString.Key: Any] = [.font: titleFont, .foregroundColor: UIColor.black]
+        let attributedTitle = NSAttributedString(string: "Фильтры", attributes: titleAttributes)
+        alert.setValue(attributedTitle, forKey: "attributedTitle")
+
+        let allAction = UIAlertAction(title: "Все трекеры", style: .default) { _ in
+            self.applyFilter(.all)
+        }
+        let todayAction = UIAlertAction(title: "Трекеры на сегодня", style: .default) { _ in
+            self.applyFilter(.today)
+        }
+        let completedAction = UIAlertAction(title: "Завершённые", style: .default) { _ in
+            self.applyFilter(.completed)
+        }
+        let uncompletedAction = UIAlertAction(title: "Незавершённые", style: .default) { _ in
+            self.applyFilter(.uncompleted)
+        }
+        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+
+        allAction.setValue(UIColor.black, forKey: "titleTextColor")
+        todayAction.setValue(UIColor.black, forKey: "titleTextColor")
+        completedAction.setValue(UIColor.black, forKey: "titleTextColor")
+        uncompletedAction.setValue(UIColor.black, forKey: "titleTextColor")
+        
+        let checkmarkImage = UIImage(systemName: "checkmark")?.withTintColor(.systemBlue, renderingMode: .alwaysOriginal)
+
+        switch currentFilter {
+        case .all:
+            allAction.setValue(checkmarkImage, forKey: "image")
+        case .today:
+            todayAction.setValue(checkmarkImage, forKey: "image")
+            datePicker.date = Date()
+        case .completed:
+            completedAction.setValue(checkmarkImage, forKey: "image")
+        case .uncompleted:
+            uncompletedAction.setValue(checkmarkImage, forKey: "image")
+        }
+
+        alert.addAction(allAction)
+        alert.addAction(todayAction)
+        alert.addAction(completedAction)
+        alert.addAction(uncompletedAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true)
+    }
+    
+    private func applyFilter(_ filter: FilterType) {
+        currentFilter = filter
+        updateVisible()
     }
     
     private func showAlert(message: String) {
@@ -206,24 +294,26 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let selectedDayIndex = calendar.component(.weekday, from: currentDate)
         guard let selectedWeekDay = DayOfWeek.getDayEnum(number: selectedDayIndex) else { return }
-        
+
         filteredCategories = categories.compactMap { category in
             let trackers = category.trackers.filter { tracker in
-                if tracker.scheduler.isEmpty {
+                let isTrackerForToday = tracker.scheduler.isEmpty || tracker.scheduler.contains(selectedWeekDay)
+                let isCompleted = isTrackerCompletedToday(id: tracker.id)
+                
+                switch currentFilter {
+                case .all:
                     return true
-                } else {
-                    let containsWeekDay = tracker.scheduler.contains { weekDay in
-                        weekDay == selectedWeekDay
-                    }
-                    return containsWeekDay
+                case .today:
+                    return isTrackerForToday
+                case .completed:
+                    return isTrackerForToday && isCompleted
+                case .uncompleted:
+                    return isTrackerForToday && !isCompleted
                 }
             }
-            if trackers.isEmpty { return nil }
-            return TrackerCategory(
-                name: category.name,
-                trackers: trackers
-            )
+            return trackers.isEmpty ? nil : TrackerCategory(name: category.name, trackers: trackers)
         }
+
         showErrorImage(filteredCategories.isEmpty)
         collectionView.reloadData()
     }
@@ -282,7 +372,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         guard let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderView.identifier, for: indexPath) as? HeaderView else {
             fatalError("Unable to dequeue HeaderView")
         }
-        header.configure(with: categories[indexPath.section].name)
+        header.configure(with: filteredCategories[indexPath.section].name)
         return header
     }
     
@@ -383,8 +473,10 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         
         private func togglePin(for tracker: Tracker, at indexPath: IndexPath) {
-            //tracker.isPinned.toggle()
-            collectionView.reloadItems(at: [indexPath])
+            trackerStore.changePinnedTracker(tracker)
+            categories = trackerCategoryStore.trackerCategories
+            updateVisible()
+            collectionView.reloadData()
         }
         
         private func editTracker(for tracker: Tracker, category: TrackerCategory , at indexPath: IndexPath) {
@@ -400,7 +492,9 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         
         private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
-            // Запуск флоу удаления
+            trackerStore.deleteTracker(tracker)
+            updateVisible()
+            collectionView.reloadData()
         }
     
 }

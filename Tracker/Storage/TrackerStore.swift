@@ -83,4 +83,33 @@ final class TrackerStore: NSObject {
         }
     }
     
+    func deleteTracker(_ tracker: Tracker) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        do {
+            let results = try context.fetch(fetchRequest)
+            
+            if let trackerToDelete = results.first {
+                context.delete(trackerToDelete)
+                try context.save()
+            }
+        } catch {
+            print("ERR: Ошибка при удалении трекера:", error)
+        }
+    }
+    
+    func changePinnedTracker(_ tracker: Tracker) {
+        let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
+        do {
+            let results = try context.fetch(fetchRequest)
+            
+            if let trackerToChangePinned = results.first {
+                trackerToChangePinned.isPinned = !trackerToChangePinned.isPinned
+                try context.save()
+            }
+        } catch {
+            print("ERR: Ошибка при удалении трекера:", error)
+        }
+    }
 }

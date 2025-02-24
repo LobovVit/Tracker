@@ -77,7 +77,6 @@ final class CategoriesViewController: UIViewController {
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         self.view.addSubview(tableView)
-        //let maxHeight = view.frame.height - 300.0 < CGFloat(items.count) * 60.0 ? view.frame.height - 300.0 : //CGFloat(items.count) * 60.0
         let maxHeight = view.frame.height - 300.0
         NSLayoutConstraint.activate([tableView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 90),

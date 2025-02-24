@@ -17,7 +17,7 @@ final class MockData {
                         color: .C_1,
                         emoji: "❤️",
                         scheduler: [.mon],
-                        isPinned: false),
+                        isPinned: true),
             ]),
         TrackerCategory(
             name: "Мое время",
@@ -37,7 +37,7 @@ final class MockData {
                         color: .C_2,
                         emoji: "😻",
                         scheduler: [.mon, .tue],
-                        isPinned: false),
+                        isPinned: true),
                 Tracker(id: UUID(),
                         name: "Жрать",
                         color: .C_3,
@@ -49,7 +49,7 @@ final class MockData {
                         color: .C_4,
                         emoji: "❤️",
                         scheduler: [.mon],
-                        isPinned: false),
+                        isPinned: true),
             ]),
         TrackerCategory(
             name: "Бестолковые занятия",

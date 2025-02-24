@@ -92,7 +92,6 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private lazy var saveBtn: UIButton = {
         let button = UIButton()
-        //button.setTitle("Создать", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 15;
         button.layer.borderColor = .init(red: 0.8, green: 0.0, blue: 0.0, alpha: 0.0)

@@ -162,7 +162,10 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                     throw TrackerCategoryStoreError.missingEmoji
                 }
                 let schedule: [DayOfWeek] = trackerCoreData.scheduler?.toEnumArray() ?? []
-                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: false))
+                let isPinned: Bool = trackerCoreData.isPinned
+                print("isPinned")
+                print(isPinned)
+                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: isPinned))
             } catch {
                 print("Err: trackerCoreData in trackerSet for \(name): \(error)")
             }
@@ -210,6 +213,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                 newTrackerCoreData.color = tracker.color.toData() ?? Data()
                 newTrackerCoreData.emoji = tracker.emoji
                 newTrackerCoreData.scheduler = tracker.scheduler.toJSONString()
+                newTrackerCoreData.isPinned = tracker.isPinned
                 newTrackerCoreData.category = trackerCategoryCorData
                 newTrackers.insert(newTrackerCoreData)
             }
