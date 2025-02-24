@@ -370,6 +370,46 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         collectionView.reloadItems(at: [indexPath])
     }
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+            let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+            let isPinned = tracker.isPinned
+            let category = filteredCategories[indexPath.section]
+
+            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+                let pinAction = UIAction(title: isPinned ? "Открепить" : "Закрепить", image: UIImage(systemName: "pin")) { [weak self] _ in
+                    self?.togglePin(for: tracker, at: indexPath)
+                }
+                
+                let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { [weak self] _ in
+                    self?.editTracker(for: tracker, category: category, at: indexPath)
+                }
+                
+                let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                    self?.deleteTracker(tracker, at: indexPath)
+                }
+                
+                return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+            }
+        }
+        
+        private func togglePin(for tracker: Tracker, at indexPath: IndexPath) {
+            //tracker.isPinned.toggle()
+            collectionView.reloadItems(at: [indexPath])
+        }
+        
+        private func editTracker(for tracker: Tracker, category: TrackerCategory , at indexPath: IndexPath) {
+            let vc = NewTrackerViewController(type: .edit, item: tracker, category: category.name)
+            vc.saveTrackerDelegate = self
+            vc.modalPresentationStyle = .automatic
+            present(vc, animated: true)
+            collectionView.reloadItems(at: [indexPath])
+        }
+        
+        private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
+            // Запуск флоу удаления
+        }
+    
 }
 
 extension TrackersViewController: TrackerCategoryStoreDelegate {
