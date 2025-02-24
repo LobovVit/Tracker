@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 
 protocol SaveTrackerDelegate: AnyObject {
     func didSaveTracker(_ tracker: Tracker, _ category: String)
@@ -13,10 +14,11 @@ protocol SaveTrackerDelegate: AnyObject {
     func getCategorys() -> [String]
 }
 
-final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate, CategoriesViewControllerDelegate {
+final class NewTrackerViewController: UIViewController, ScheduleViewControllerDelegate {
     
     private var alertPresenter: AlertPresenting?
     private var typeTracker: AdditionType
+    private var isEdit: Bool = false
     private var tracker: Tracker
     private var trackerCategory: String?
     
@@ -44,7 +46,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         layout.itemSize = CGSize(width: itemWidth, height: itemWidth)
         
         layout.headerReferenceSize = CGSize(width: UIScreen.main.bounds.width, height: 34)
-
+        
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.isScrollEnabled = false
         collectionView.backgroundColor = .white
@@ -59,7 +61,6 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "Новая привычка"
         label.textColor = .black
         label.font = .systemFont(ofSize: .init(22), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -91,14 +92,12 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private lazy var saveBtn: UIButton = {
         let button = UIButton()
-        button.setTitle("Создать", for: .normal)
+        //button.setTitle("Создать", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .gray
         button.layer.cornerRadius = 15;
         button.layer.borderColor = .init(red: 0.8, green: 0.0, blue: 0.0, alpha: 0.0)
         button.layer.borderWidth = 1.0
         button.addTarget(self, action: #selector(didTapSave), for: .touchUpInside)
-        button.isEnabled = false
         button.translatesAutoresizingMaskIntoConstraints = false
         button.accessibilityIdentifier = "saveBtn"
         return button
@@ -182,18 +181,23 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     init(type: AdditionType, item: Tracker?, category: String?) {
         if type == .edit {
+            self.isEdit = true
             guard let item else { fatalError("edit item cannot be empty") }
-            tracker = item
+            self.tracker = item
             guard let category else { fatalError("edit category cannot be empty") }
-            trackerCategory = category
-            if item.scheduler.isEmpty {
-                typeTracker = .irregular
-            } else {
-                typeTracker = .habit
+            self.trackerCategory = category
+            self.typeTracker = .habit
+            color = item.color
+            emoji = item.emoji
+            if let emojiIndex = emojis.firstIndex(where: { $0 == item.emoji }) {
+                self.selectedEmojiIndex = IndexPath(item: emojiIndex, section: 0)
+            }
+            if let colorIndex = colors.firstIndex(where: { $0 == item.color }) {
+                self.selectedColorIndex = IndexPath(item: colorIndex, section: 1)
             }
         } else {
             typeTracker = type
-            tracker = Tracker(id: UUID(), name: "", color: .clear, emoji: "", scheduler: [])
+            tracker = Tracker(id: UUID(), name: "", color: .clear, emoji: "", scheduler: [], isPinned: false)
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -233,7 +237,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
             showAlert(message: "Выберите категорию")
             return
         }
-        let newTracker = Tracker(id: tracker.id, name: nameTextField.text ?? "", color: color, emoji: emoji, scheduler: schedule.compactMap { $0 })
+        let newTracker = Tracker(id: tracker.id, name: nameTextField.text ?? "", color: color, emoji: emoji, scheduler: schedule.compactMap { $0 }, isPinned: false)
         saveTrackerDelegate?.didSaveTracker(newTracker, trackerCategory)
     }
     
@@ -242,13 +246,33 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         saveTrackerDelegate?.didTapCancelButton()
     }
     
+    @objc private func didTapCategorySwiftUI() {
+        let store = TrackerCategoryStore()
+        let viewModel = TrackerCategoryViewModel(categoryStore: store)
+        
+        let swiftUIView = TrackerCategoryView(
+            viewModel: viewModel,
+            trackerCategory: .constant(trackerCategory),
+            onCategorySelected: { [weak self] category in
+                self?.trackerCategory = category.name
+                self?.didUpdateCategory(category.name ?? "Unknown")
+            }
+        )
+        
+        let hostingController = UIHostingController(rootView: swiftUIView)
+        hostingController.modalPresentationStyle = .formSheet
+        present(hostingController, animated: true)
+    }
+    
     @objc
     private func didTapCategory() {
-        let vc = CategoriesViewController(categories: saveTrackerDelegate?.getCategorys() ?? [], category: trackerCategory)
-        vc.delegate = self
-        vc.loadSelectedCategory(from: trackerCategory)
-        vc.modalPresentationStyle = .automatic
-        present(vc, animated: true)
+        let categoriesVC = CategoriesViewController()
+            categoriesVC.onCategorySelected = { [weak self] selectedCategory in
+                guard let self = self else { return }
+                self.trackerCategory = selectedCategory
+                self.didUpdateCategory(selectedCategory)
+            }
+            present(categoriesVC, animated: true)
     }
     
     @objc
@@ -267,7 +291,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
                 title: message,
                 message: message,
                 buttonText: "Ок",
-                completion: {  } 
+                completion: {  }
             )
             self.alertPresenter?.showAlert(for: alertModel)
         }
@@ -292,6 +316,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addLabel(label: UILabel) {
         view.addSubview(label)
+        label.text = isEdit ? "Редактируем привычку" : "Новая привычка"
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 50)])
     }
@@ -321,6 +346,9 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addSaveBtn(button: UIButton) {
         self.view.addSubview(button)
+        button.isEnabled = isEdit
+        button.backgroundColor = isEdit ? .black : .gray
+        isEdit ? button.setTitle("Сохранить", for: .normal) : button.setTitle("Создать", for: .normal)
         NSLayoutConstraint.activate([button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
                                      button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: view.frame.width / 4 - 5),
                                      button.widthAnchor.constraint(equalToConstant: view.frame.width / 2 - 25),
@@ -336,6 +364,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     }
     
     private func addNameTextField(textField: UITextField) {
+        textField.text = isEdit ? tracker.name : ""
         contentView.addSubview(textField)
         NSLayoutConstraint.activate([textField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                                      textField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
@@ -345,6 +374,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addCategoryBtn(button: DetailButton) {
         contentView.addSubview(button)
+        isEdit ? didUpdateCategory(trackerCategory) : didUpdateCategory("")
         NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 90),
@@ -353,6 +383,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addSceduleBtn(button: DetailButton) {
         contentView.addSubview(button)
+        isEdit ? {didUpdateSchedule(tracker.scheduler)}() : {}()
         NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 150),
@@ -403,11 +434,11 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 2
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return section == 0 ? emojis.count : colors.count
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if indexPath.section == 0 {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: EmojiCell.reuseIdentifier, for: indexPath) as? EmojiCell else {
@@ -425,7 +456,7 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
             return cell
         }
     }
-
+    
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         guard kind == UICollectionView.elementKindSectionHeader,
               let header = collectionView.dequeueReusableSupplementaryView(
@@ -438,7 +469,7 @@ extension NewTrackerViewController: UICollectionViewDataSource, UICollectionView
         header.configure(with: indexPath.section == 0 ? "Emoji" : "Цвет")
         return header
     }
-
+    
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

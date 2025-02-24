@@ -35,10 +35,12 @@ protocol TrackerCategoryStoreDelegate: AnyObject {
     )
 }
 
-final class TrackerCategoryStore: NSObject {
+final class TrackerCategoryStore: NSObject, ObservableObject {
     private let context: NSManagedObjectContext
     private var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData>?
     private let trackerStore = TrackerStore()
+    
+    @Published var categories: [TrackerCategoryCoreData] = []
     
     weak var delegate: TrackerCategoryStoreDelegate?
     private var insertedIndexes: IndexSet?
@@ -87,6 +89,58 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
+    func fetchCategories() {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        do {
+            categories = try context.fetch(request)
+        } catch {
+            print("Err: Failed to fetch categories: \(error)")
+        }
+    }
+    
+    func addCategory(name: String) {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmedName.isEmpty else { return } // Игнорируем пустые названия
+        guard !categoryExists(name: trimmedName) else {
+            print("Err: Категория с таким именем уже существует!")
+            return
+        }
+        
+        let newCategory = TrackerCategoryCoreData(context: context)
+        newCategory.name = trimmedName
+        
+        do {
+            try context.save()
+        } catch {
+            print("Err: Ошибка при сохранении категории: \(error)")
+        }
+    }
+    
+    func fetchAllCategories() -> [TrackerCategoryCoreData] {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        do {
+            return try context.fetch(request)
+        } catch {
+            print("Err: Failed to fetch categories: \(error)")
+            return []
+        }
+    }
+    
+    private func categoryExists(name: String) -> Bool {
+        let request: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
+        request.predicate = NSPredicate(format: "name == %@", name)
+        request.fetchLimit = 1
+        
+        do {
+            let count = try context.count(for: request)
+            return count > 0
+        } catch {
+            print("Err: Ошибка при проверке существования категории: \(error)")
+            return false
+        }
+    }
+    
     func trackerCategory(from trackerCategoryStore: TrackerCategoryCoreData) throws -> TrackerCategory {
         guard let name = trackerCategoryStore.name else { throw TrackerCategoryStoreError.missingCategoryName }
         var trackers: [Tracker] = []
@@ -108,7 +162,7 @@ final class TrackerCategoryStore: NSObject {
                     throw TrackerCategoryStoreError.missingEmoji
                 }
                 let schedule: [DayOfWeek] = trackerCoreData.scheduler?.toEnumArray() ?? []
-                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule))
+                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: false))
             } catch {
                 print("Err: trackerCoreData in trackerSet for \(name): \(error)")
             }

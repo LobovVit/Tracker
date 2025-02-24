@@ -27,6 +27,18 @@ final class ImageViewController: UIViewController {
         return label
     }()
     
+    private lazy var goBtn: UIButton = {
+        let btn = UIButton()
+        btn.setTitle("Вот это технологии", for: .normal)
+        btn.setTitleColor(.white, for: .normal)
+        btn.backgroundColor = .black
+        btn.layer.cornerRadius = 15
+        btn.addTarget(self, action: #selector(didTapGoBtn), for: .touchUpInside)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.accessibilityIdentifier = "goBtn"
+        return btn
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .black
@@ -43,6 +55,14 @@ final class ImageViewController: UIViewController {
                 addLabel(label: label, text: "Даже если это не литры воды и йога")
             }
         }
+        addGoBtn(button: goBtn)
+    }
+    
+    @objc
+    private func didTapGoBtn() {
+        let vc = TabBarViewController()
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
     
     private func addLabel(label: UILabel, text: String) {
@@ -51,5 +71,14 @@ final class ImageViewController: UIViewController {
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      label.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 50),
                                      label.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor, multiplier: 0.9)])
+    }
+    
+    private func addGoBtn(button: UIButton) {
+        self.view.addSubview(button)
+        NSLayoutConstraint.activate([button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
+                                     button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
+                                     button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+                                     button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+                                     button.heightAnchor.constraint(equalToConstant: 60)])
     }
 }

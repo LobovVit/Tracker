@@ -7,22 +7,10 @@
 
 import UIKit
 
-final class OnboardingImagesViewController: UIPageViewController, UIPageViewControllerDataSource {
+final class OnboardingImagesViewController: UIPageViewController, UIPageViewControllerDataSource, UIPageViewControllerDelegate {
     
     private let images = ["ypBg1", "ypBg2"]
     private let trackerCategoryStore = TrackerCategoryStore()
-    
-    private lazy var goBtn: UIButton = {
-        let btn = UIButton()
-        btn.setTitle("Вот это технологии", for: .normal)
-        btn.setTitleColor(.white, for: .normal)
-        btn.backgroundColor = .black
-        btn.layer.cornerRadius = 15
-        btn.addTarget(self, action: #selector(didTapGoBtn), for: .touchUpInside)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        btn.accessibilityIdentifier = "goBtn"
-        return btn
-    }()
     
     private lazy var loadBtn: UIButton = {
         let btn = UIButton()
@@ -39,6 +27,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     private lazy var pageControl: UIPageControl = {
         let pc = UIPageControl()
         pc.numberOfPages = images.count
+        pc.currentPage = 0
         pc.currentPageIndicatorTintColor = .black
         pc.pageIndicatorTintColor = .lightGray
         pc.translatesAutoresizingMaskIntoConstraints = false
@@ -49,12 +38,12 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     override func viewDidLoad() {
         super.viewDidLoad()
         dataSource = self
+        delegate = self
         view.backgroundColor = .black
         if let firstVC = viewControllerForImage(at: 0) {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
-        addGoBtn(button: goBtn)
-    //    addLoadBtn(button: loadBtn)
+            addLoadBtn(button: loadBtn)
         addPageControl(pageControl: pageControl)
     }
     
@@ -70,13 +59,13 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         trackerCategoryStore.clearCoreData(for: "TrackerCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerCategoryCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerRecordCodeData")
-//        for tracker in MockData.mockData[...] {
-//            do {
-//                try trackerCategoryStore.updateTrackerCategory(tracker)
-//            } catch {
-//                print("ERR: in trackerCategoryStore.addNewTrackerCategory")
-//            }
-//        }
+        for tracker in MockData.mockData[...] {
+            do {
+                try trackerCategoryStore.updateTrackerCategory(tracker)
+            } catch {
+                print("ERR: in trackerCategoryStore.addNewTrackerCategory")
+            }
+        }
         
     }
     
@@ -90,23 +79,15 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        let currentIndex = viewController.view.tag
+        guard let currentIndex = index(of: viewController) else { return nil }
         return viewControllerForImage(at: currentIndex - 1)
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        let currentIndex = viewController.view.tag
+        guard let currentIndex = index(of: viewController) else { return nil }
         return viewControllerForImage(at: currentIndex + 1)
     }
     
-    private func addGoBtn(button: UIButton) {
-        self.view.addSubview(button)
-        NSLayoutConstraint.activate([button.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                                     button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
-                                     button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
-                                     button.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
-                                     button.heightAnchor.constraint(equalToConstant: 60)])
-    }
     
     private func addLoadBtn(button: UIButton) {
         self.view.addSubview(button)
@@ -121,6 +102,17 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         self.view.addSubview(pageControl)
         NSLayoutConstraint.activate([pageControl.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      pageControl.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -110)])
+    }
+    
+    
+    private func index(of viewController: UIViewController) -> Int? {
+        return viewController.view.tag
+    }
+    
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        if completed, let currentVC = viewControllers?.first, let index = index(of: currentVC) {
+            pageControl.currentPage = index
+        }
     }
 }
 

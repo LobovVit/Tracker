@@ -13,12 +13,12 @@ final class OnboardingViewController: UIViewController {
     
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else { return }
-        if OnboardingLaunchedEarlier.shared.didAppStart {
+        if !OnboardingLaunchedEarlier.shared.didAppStart {
             let tabBarController = TabBarViewController()
             window.rootViewController = tabBarController
         } else {
             OnboardingLaunchedEarlier.shared.didAppStart = true
-            let onboardingImagesViewController = OnboardingImagesViewController()
+            let onboardingImagesViewController = OnboardingImagesViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
             window.rootViewController = onboardingImagesViewController
         }
     }
