@@ -31,7 +31,7 @@ final class TrackersViewController: UIViewController {
     private lazy var label: UILabel = {
         let label = UILabel()
         label.text = "Трекеры"
-        label.textColor = .black
+        label.textColor = .textColor
         label.font = .systemFont(ofSize: .init(34), weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -64,9 +64,9 @@ final class TrackersViewController: UIViewController {
         textField.layer.masksToBounds = true
         textField.layer.borderWidth = 0.5
         textField.backgroundImage = UIImage()
-        textField.searchTextField.backgroundColor = .clear
-        textField.backgroundColor = .ypGray
-        textField.layer.borderColor = UIColor.ypGray.cgColor
+        textField.searchTextField.backgroundColor = .searchBarColor
+        textField.backgroundColor = .searchBarColor
+        textField.layer.borderColor = UIColor.searchBarColor.cgColor
         textField.searchTextField.font = .systemFont(ofSize: .init(17), weight: .regular)
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
@@ -82,7 +82,7 @@ final class TrackersViewController: UIViewController {
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
-        label.textColor = .black
+        label.textColor = .textColor
         label.font = .systemFont(ofSize: .init(18), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -99,7 +99,7 @@ final class TrackersViewController: UIViewController {
         let descriptionLabel = UILabel()
         descriptionLabel.text = "Ничего не найдено"
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
-        descriptionLabel.textColor = .black
+        descriptionLabel.textColor = .textColor
         descriptionLabel.numberOfLines = 2
         descriptionLabel.textAlignment = .center
         descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -164,7 +164,7 @@ final class TrackersViewController: UIViewController {
         let alert = UIAlertController(title: "Фильтры", message: nil, preferredStyle: .actionSheet)
 
         let titleFont = UIFont.systemFont(ofSize: 20, weight: .bold)
-        let titleAttributes: [NSAttributedString.Key: Any] = [.font: titleFont, .foregroundColor: UIColor.black]
+        let titleAttributes: [NSAttributedString.Key: Any] = [.font: titleFont]
         let attributedTitle = NSAttributedString(string: "Фильтры", attributes: titleAttributes)
         alert.setValue(attributedTitle, forKey: "attributedTitle")
 
@@ -181,11 +181,6 @@ final class TrackersViewController: UIViewController {
             self.applyFilter(.uncompleted)
         }
         let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
-
-        allAction.setValue(UIColor.black, forKey: "titleTextColor")
-        todayAction.setValue(UIColor.black, forKey: "titleTextColor")
-        completedAction.setValue(UIColor.black, forKey: "titleTextColor")
-        uncompletedAction.setValue(UIColor.black, forKey: "titleTextColor")
         
         let checkmarkImage = UIImage(systemName: "checkmark")?.withTintColor(.systemBlue, renderingMode: .alwaysOriginal)
 
@@ -504,5 +499,25 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
         categories = trackerCategoryStore.trackerCategories
         updateVisible()
         collectionView.reloadData()
+    }
+}
+
+extension TrackersViewController{
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateTheme()
+        }
+    }
+
+    private func updateTheme() {
+        view.backgroundColor = .backgroundColor
+        label.textColor = .textColor
+        errorLabel.textColor = .textColor
+        textField.searchTextField.backgroundColor = .searchBarColor
+        textField.backgroundColor = .searchBarColor
+        textField.layer.borderColor = UIColor.searchBarColor.cgColor
+        collectionView.backgroundColor = .backgroundColor
     }
 }

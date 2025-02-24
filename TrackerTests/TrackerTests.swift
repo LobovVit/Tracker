@@ -10,16 +10,27 @@ import SnapshotTesting
 @testable import Tracker
 
 final class TrackersViewControllerSnapshotTests: XCTestCase {
-
-    func testTrackersViewControllerSnapshot() {
+    
+    let isRecordingMode = false // Менять на `true`, если нужно обновить снимки
+    
+    func testTrackersViewController_LightMode() {
+        let vc = UINavigationController(rootViewController: TrackersViewController())
         let ob = OnboardingImagesViewController()
-        let vc = TrackersViewController()
-        let navController = UINavigationController(rootViewController: vc)
         ob.didTapLoadBtn()
-        navController.loadViewIfNeeded()
-        navController.view.layoutIfNeeded()
+        vc.loadViewIfNeeded()
         withSnapshotTesting {
-            assertSnapshot(of: navController, as: .image, record: false) // Менять `record` на `true`, если нужно обновить снимок
+            assertSnapshot(of: vc, as: .image(traits: .init(userInterfaceStyle: .light)), record: isRecordingMode)
         }
     }
+    
+    func testTrackersViewController_DarkMode() {
+        let vc = UINavigationController(rootViewController: TrackersViewController())
+        let ob = OnboardingImagesViewController()
+        ob.didTapLoadBtn()
+        vc.loadViewIfNeeded()
+        withSnapshotTesting {
+            assertSnapshot(of: vc, as: .image(traits: .init(userInterfaceStyle: .dark)), record: isRecordingMode)
+        }
+    }
+    
 }
