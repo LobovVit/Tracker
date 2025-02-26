@@ -28,6 +28,7 @@ final class TrackerStore: NSObject {
     private func saveContext() {
         do {
             try context.save()
+            NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: nil)
         } catch {
             context.rollback()
         }
@@ -77,7 +78,7 @@ final class TrackerStore: NSObject {
                     trackerCoreData.category = newCategoryCoreData
                 }
             }
-            try context.save()
+            saveContext()
         } catch {
             print("ERR: Ошибка при сохранении/обновлении трекера:", error)
         }
@@ -91,7 +92,7 @@ final class TrackerStore: NSObject {
             
             if let trackerToDelete = results.first {
                 context.delete(trackerToDelete)
-                try context.save()
+                saveContext()
             }
         } catch {
             print("ERR: Ошибка при удалении трекера:", error)
@@ -106,10 +107,11 @@ final class TrackerStore: NSObject {
             
             if let trackerToChangePinned = results.first {
                 trackerToChangePinned.isPinned = !trackerToChangePinned.isPinned
-                try context.save()
+                saveContext()
             }
         } catch {
             print("ERR: Ошибка при удалении трекера:", error)
         }
     }
+    
 }

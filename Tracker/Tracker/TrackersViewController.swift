@@ -28,6 +28,8 @@ final class TrackersViewController: UIViewController {
     private let trackerCategoryStore = TrackerCategoryStore()
     private let trackerRecordStore = TrackerRecordStore()
     
+    private var analyticsService = AnalyticsService()
+    
     private lazy var label: UILabel = {
         let label = UILabel()
         label.text = "Трекеры"
@@ -135,6 +137,7 @@ final class TrackersViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        analyticsService.report(event: "open", params: ["screen": "Main"])
         alertPresenter = AlertPresenter(viewController: self)
         trackerCategoryStore.delegate = self
         categories = trackerCategoryStore.trackerCategories
@@ -149,6 +152,11 @@ final class TrackersViewController: UIViewController {
         
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+            super.viewWillDisappear(animated)
+            analyticsService.report(event: "close", params: ["screen": "Main"])
+        }
+    
     private func addFilterButton() {
         view.addSubview(filterButton)
         
@@ -161,6 +169,7 @@ final class TrackersViewController: UIViewController {
     }
     
     @objc private func didTapFilterButton() {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
         let alert = UIAlertController(title: "Фильтры", message: nil, preferredStyle: .actionSheet)
 
         let titleFont = UIFont.systemFont(ofSize: 20, weight: .bold)
@@ -329,6 +338,7 @@ final class TrackersViewController: UIViewController {
     
     @objc
     private func didTapButton() {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "add_track"])
         let vc = AdditionViewController()
         vc.saveTrackerDelegate = self
         vc.modalPresentationStyle = .automatic
@@ -422,6 +432,7 @@ extension TrackersViewController: SaveTrackerDelegate {
 
 extension TrackersViewController: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
         let todayDate = Date()
         guard datePicker.date <= todayDate else {
             showAlert(message: "Нельзя отметить трекер для будущей даты \(datePicker.date)")
@@ -437,6 +448,7 @@ extension TrackersViewController: TrackerCellDelegate {
     }
     
     func uncompleteTracker(id: UUID, at indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"]) 
         do {
             try trackerRecordStore.deleteRecord(id: id, date: datePicker.date)
         } catch {
@@ -475,6 +487,7 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         
         private func editTracker(for tracker: Tracker, category: TrackerCategory , at indexPath: IndexPath) {
+            analyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
             let vc = NewTrackerViewController(type: .edit, item: tracker, category: category.name)
             vc.saveTrackerDelegate = self
             vc.modalPresentationStyle = .automatic
@@ -487,6 +500,7 @@ extension TrackersViewController: TrackerCellDelegate {
         }
         
         private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
+            analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
             trackerStore.deleteTracker(tracker)
             updateVisible()
             collectionView.reloadData()

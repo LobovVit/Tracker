@@ -43,7 +43,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         if let firstVC = viewControllerForImage(at: 0) {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
-            addLoadBtn(button: loadBtn)
+        //addLoadBtn(button: loadBtn)
         addPageControl(pageControl: pageControl)
     }
     

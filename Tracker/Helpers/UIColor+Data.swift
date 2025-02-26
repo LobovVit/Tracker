@@ -30,6 +30,6 @@ extension UIColor {
     }
     
     static let searchBarColor = UIColor { traitCollection in
-        return traitCollection.userInterfaceStyle == .dark ? .darkGray : .lightGray
+        return traitCollection.userInterfaceStyle == .dark ? .darkGray : .systemGray6
     }
 }

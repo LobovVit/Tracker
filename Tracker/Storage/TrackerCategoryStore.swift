@@ -110,11 +110,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
         let newCategory = TrackerCategoryCoreData(context: context)
         newCategory.name = trimmedName
         
-        do {
-            try context.save()
-        } catch {
-            print("Err: Ошибка при сохранении категории: \(error)")
-        }
+        saveContext()
     }
     
     func fetchAllCategories() -> [TrackerCategoryCoreData] {
@@ -163,8 +159,6 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                 }
                 let schedule: [DayOfWeek] = trackerCoreData.scheduler?.toEnumArray() ?? []
                 let isPinned: Bool = trackerCoreData.isPinned
-                print("isPinned")
-                print(isPinned)
                 trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: isPinned))
             } catch {
                 print("Err: trackerCoreData in trackerSet for \(name): \(error)")
@@ -193,7 +187,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
         
         trackerCategoryCoreData.tracker = updatedTrackers as NSSet
         
-        try context.save()
+        saveContext()
     }
     
     func updateTrackersInCategory(_ trackerCategoryCorData: TrackerCategoryCoreData, with category: TrackerCategory) -> Set<TrackerCoreData> {
@@ -228,9 +222,18 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
         
         do {
             try context.execute(deleteRequest)
-            try context.save()
         } catch {
             print("Err: clearCoreData: \(error.localizedDescription)")
+        }
+        saveContext()
+    }
+    
+    private func saveContext() {
+        do {
+            try context.save()
+            NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: nil)
+        } catch {
+            context.rollback()
         }
     }
     
