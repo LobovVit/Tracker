@@ -144,15 +144,15 @@ final class TrackerCell: UICollectionViewCell {
         let lastTwoDigits = number % 100
         
         if lastTwoDigits >= 11 && lastTwoDigits <= 19 {
-            return "дней"
+            return "days 11-19".localized
         }
         switch lastDigit {
         case 1:
-            return "день"
+            return "day 1".localized
         case 2, 3, 4:
-            return "дня"
+            return "days 2-4".localized
         default:
-            return "дней"
+            return "days".localized
         }
     }
     

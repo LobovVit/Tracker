@@ -1,0 +1,27 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Vitaly Lobov on 26.02.2025.
+  
+*/
+"Trackers" = "Trackers";
+"Search" = "Search";
+"What will we track?" = "What will we track?";
+"Nothing found" = "Nothing found";
+"Filters" = "Filters";
+"All trackers" = "All trackers";
+"Trackers for today" = "Trackers for today";
+"Completed" = "Completed";
+"Incomplete" = "Incomplete";
+"Cancel" = "Cancel";
+"OK" = "OK";
+"Cannot mark a tracker for a future date" = "Cannot mark a tracker for a future date";
+"Unpin" = "Unpin";
+"Pin" = "Pin";
+"Edit" = "Edit";
+"Delete" = "Delete";
+"days 11-19" = "days";
+"day 1" = "day";
+"days 2-4" = "days";
+"days" = "days";

@@ -14,6 +14,8 @@ final class TrackersViewControllerSnapshotTests: XCTestCase {
     let isRecordingMode = false // Менять на `true`, если нужно обновить снимки
     
     func testTrackersViewController_LightMode() {
+        UserDefaults.standard.set(["ru"], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
         let vc = UINavigationController(rootViewController: TrackersViewController())
         let ob = OnboardingImagesViewController()
         ob.didTapLoadBtn()
@@ -24,6 +26,8 @@ final class TrackersViewControllerSnapshotTests: XCTestCase {
     }
     
     func testTrackersViewController_DarkMode() {
+        UserDefaults.standard.set(["ru"], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
         let vc = UINavigationController(rootViewController: TrackersViewController())
         let ob = OnboardingImagesViewController()
         ob.didTapLoadBtn()

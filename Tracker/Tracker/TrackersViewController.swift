@@ -32,7 +32,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "Трекеры"
+        label.text = "Trackers".localized
         label.textColor = .textColor
         label.font = .systemFont(ofSize: .init(34), weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -61,7 +61,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var textField: UISearchBar = {
         let textField = UISearchBar()
-        textField.placeholder = "Поиск"
+        textField.placeholder = "Search".localized
         textField.layer.cornerRadius = 15;
         textField.layer.masksToBounds = true
         textField.layer.borderWidth = 0.5
@@ -83,7 +83,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "Что будем отслеживать?"
+        label.text = "What will we track?".localized
         label.textColor = .textColor
         label.font = .systemFont(ofSize: .init(18), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -99,7 +99,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var errorLabel: UILabel = {
         let descriptionLabel = UILabel()
-        descriptionLabel.text = "Ничего не найдено"
+        descriptionLabel.text = "Nothing found".localized
         descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .textColor
         descriptionLabel.numberOfLines = 2
@@ -124,7 +124,7 @@ final class TrackersViewController: UIViewController {
     
     private lazy var filterButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Фильтры", for: .normal)
+        button.setTitle("Filters".localized, for: .normal)
         button.backgroundColor = .systemBlue
         button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
@@ -170,26 +170,26 @@ final class TrackersViewController: UIViewController {
     
     @objc private func didTapFilterButton() {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
-        let alert = UIAlertController(title: "Фильтры", message: nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: "Filters".localized, message: nil, preferredStyle: .actionSheet)
 
         let titleFont = UIFont.systemFont(ofSize: 20, weight: .bold)
         let titleAttributes: [NSAttributedString.Key: Any] = [.font: titleFont]
-        let attributedTitle = NSAttributedString(string: "Фильтры", attributes: titleAttributes)
+        let attributedTitle = NSAttributedString(string: "Filters".localized, attributes: titleAttributes)
         alert.setValue(attributedTitle, forKey: "attributedTitle")
 
-        let allAction = UIAlertAction(title: "Все трекеры", style: .default) { _ in
+        let allAction = UIAlertAction(title: "All trackers".localized, style: .default) { _ in
             self.applyFilter(.all)
         }
-        let todayAction = UIAlertAction(title: "Трекеры на сегодня", style: .default) { _ in
+        let todayAction = UIAlertAction(title: "Trackers for today".localized, style: .default) { _ in
             self.applyFilter(.today)
         }
-        let completedAction = UIAlertAction(title: "Завершённые", style: .default) { _ in
+        let completedAction = UIAlertAction(title: "Completed".localized, style: .default) { _ in
             self.applyFilter(.completed)
         }
-        let uncompletedAction = UIAlertAction(title: "Незавершённые", style: .default) { _ in
+        let uncompletedAction = UIAlertAction(title: "Incomplete".localized, style: .default) { _ in
             self.applyFilter(.uncompleted)
         }
-        let cancelAction = UIAlertAction(title: "Отмена", style: .cancel)
+        let cancelAction = UIAlertAction(title: "Cancel".localized, style: .cancel)
         
         let checkmarkImage = UIImage(systemName: "checkmark")?.withTintColor(.systemBlue, renderingMode: .alwaysOriginal)
 
@@ -225,8 +225,8 @@ final class TrackersViewController: UIViewController {
             let alertModel = AlertModel(
                 title: message,
                 message: message,
-                buttonText: "Ок",
-                completion: {  } 
+                buttonText: "OK".localized,
+                completion: {  }
             )
             self.alertPresenter?.showAlert(for: alertModel)
         }
@@ -394,7 +394,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
         do {
             return try trackerRecordStore.fetchRecord(id: id, date: datePicker.date) != nil
         } catch {
-            print("Ошибка при проверке записи трекера: \(error)")
+            print("ERR: trackerRecordStore.fetchRecord: \(error)")
             return false
         }
     }
@@ -433,9 +433,16 @@ extension TrackersViewController: SaveTrackerDelegate {
 extension TrackersViewController: TrackerCellDelegate {
     func completeTracker(id: UUID, at indexPath: IndexPath) {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "track"])
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .none
+        formatter.locale = Locale.current
+        let calendar = Calendar.current
         let todayDate = Date()
-        guard datePicker.date <= todayDate else {
-            showAlert(message: "Нельзя отметить трекер для будущей даты \(datePicker.date)")
+        let truncDate = calendar.startOfDay(for: todayDate)
+        let endOfDay = calendar.date(byAdding: DateComponents(hour: 23, minute: 59, second: 59), to: truncDate) ?? truncDate
+        guard datePicker.date < endOfDay else {
+            showAlert(message: "Cannot mark a tracker for a future date".localized + " \(formatter.string(from: truncDate))")
             return
         }
         
@@ -463,15 +470,15 @@ extension TrackersViewController: TrackerCellDelegate {
             let category = filteredCategories[indexPath.section]
 
             return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-                let pinAction = UIAction(title: isPinned ? "Открепить" : "Закрепить", image: UIImage(systemName: "pin")) { [weak self] _ in
+                let pinAction = UIAction(title: isPinned ? "Unpin".localized : "Pin".localized, image: UIImage(systemName: "pin")) { [weak self] _ in
                     self?.togglePin(for: tracker, at: indexPath)
                 }
                 
-                let editAction = UIAction(title: "Редактировать", image: UIImage(systemName: "pencil")) { [weak self] _ in
+                let editAction = UIAction(title: "Edit".localized, image: UIImage(systemName: "pencil")) { [weak self] _ in
                     self?.editTracker(for: tracker, category: category, at: indexPath)
                 }
                 
-                let deleteAction = UIAction(title: "Удалить", image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                let deleteAction = UIAction(title: "Delete".localized, image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
                     self?.deleteTracker(tracker, at: indexPath)
                 }
                 
