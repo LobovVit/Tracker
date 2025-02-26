@@ -24,10 +24,10 @@ final class StatCardView: UIView {
         label.textAlignment = .left
         return label
     }()
-
+    
     private let gradientBorder = CAGradientLayer()
     private let borderMask = CAShapeLayer()
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -37,7 +37,7 @@ final class StatCardView: UIView {
         super.init(coder: coder)
         setupUI()
     }
-
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         applyGradientBorder()
@@ -47,10 +47,10 @@ final class StatCardView: UIView {
         backgroundColor = .white
         layer.cornerRadius = 15
         layer.masksToBounds = true
-
+        
         addSubview(valueLabel)
         addSubview(titleLabel)
-
+        
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -69,21 +69,21 @@ final class StatCardView: UIView {
         valueLabel.text = "\(value)"
         titleLabel.text = title
     }
-
+    
     private func applyGradientBorder() {
         gradientBorder.frame = bounds
         gradientBorder.colors = [UIColor.red.cgColor, UIColor.green.cgColor, UIColor.blue.cgColor]
         gradientBorder.startPoint = CGPoint(x: 0, y: 0)
         gradientBorder.endPoint = CGPoint(x: 1, y: 1)
-
+        
         let cornerRadius: CGFloat = 15
         let path = UIBezierPath(roundedRect: bounds.insetBy(dx: 1, dy: 1), cornerRadius: cornerRadius).cgPath
-
+        
         borderMask.path = path
         borderMask.lineWidth = 2
         borderMask.fillColor = UIColor.clear.cgColor
         borderMask.strokeColor = UIColor.black.cgColor
-
+        
         gradientBorder.mask = borderMask
         layer.addSublayer(gradientBorder)
     }

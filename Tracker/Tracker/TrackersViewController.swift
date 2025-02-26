@@ -153,9 +153,9 @@ final class TrackersViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
-            analyticsService.report(event: "close", params: ["screen": "Main"])
-        }
+        super.viewWillDisappear(animated)
+        analyticsService.report(event: "close", params: ["screen": "Main"])
+    }
     
     private func addFilterButton() {
         view.addSubview(filterButton)
@@ -171,12 +171,12 @@ final class TrackersViewController: UIViewController {
     @objc private func didTapFilterButton() {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "filter"])
         let alert = UIAlertController(title: "Filters".localized, message: nil, preferredStyle: .actionSheet)
-
+        
         let titleFont = UIFont.systemFont(ofSize: 20, weight: .bold)
         let titleAttributes: [NSAttributedString.Key: Any] = [.font: titleFont]
         let attributedTitle = NSAttributedString(string: "Filters".localized, attributes: titleAttributes)
         alert.setValue(attributedTitle, forKey: "attributedTitle")
-
+        
         let allAction = UIAlertAction(title: "All trackers".localized, style: .default) { _ in
             self.applyFilter(.all)
         }
@@ -192,7 +192,7 @@ final class TrackersViewController: UIViewController {
         let cancelAction = UIAlertAction(title: "Cancel".localized, style: .cancel)
         
         let checkmarkImage = UIImage(systemName: "checkmark")?.withTintColor(.systemBlue, renderingMode: .alwaysOriginal)
-
+        
         switch currentFilter {
         case .all:
             allAction.setValue(checkmarkImage, forKey: "image")
@@ -204,13 +204,13 @@ final class TrackersViewController: UIViewController {
         case .uncompleted:
             uncompletedAction.setValue(checkmarkImage, forKey: "image")
         }
-
+        
         alert.addAction(allAction)
         alert.addAction(todayAction)
         alert.addAction(completedAction)
         alert.addAction(uncompletedAction)
         alert.addAction(cancelAction)
-
+        
         present(alert, animated: true)
     }
     
@@ -243,7 +243,7 @@ final class TrackersViewController: UIViewController {
             errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
-
+    
     
     private func addLabel(label: UILabel) {
         view.addSubview(label)
@@ -298,7 +298,7 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let selectedDayIndex = calendar.component(.weekday, from: currentDate)
         guard let selectedWeekDay = DayOfWeek.getDayEnum(number: selectedDayIndex) else { return }
-
+        
         filteredCategories = categories.compactMap { category in
             let trackers = category.trackers.filter { tracker in
                 let isTrackerForToday = tracker.scheduler.isEmpty || tracker.scheduler.contains(selectedWeekDay)
@@ -317,7 +317,7 @@ final class TrackersViewController: UIViewController {
             }
             return trackers.isEmpty ? nil : TrackerCategory(name: category.name, trackers: trackers)
         }
-
+        
         showErrorImage(filteredCategories.isEmpty)
         collectionView.reloadData()
     }
@@ -465,53 +465,53 @@ extension TrackersViewController: TrackerCellDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
-            let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
-            let isPinned = tracker.isPinned
-            let category = filteredCategories[indexPath.section]
-
-            return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-                let pinAction = UIAction(title: isPinned ? "Unpin".localized : "Pin".localized, image: UIImage(systemName: "pin")) { [weak self] _ in
-                    self?.togglePin(for: tracker, at: indexPath)
-                }
-                
-                let editAction = UIAction(title: "Edit".localized, image: UIImage(systemName: "pencil")) { [weak self] _ in
-                    self?.editTracker(for: tracker, category: category, at: indexPath)
-                }
-                
-                let deleteAction = UIAction(title: "Delete".localized, image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
-                    self?.deleteTracker(tracker, at: indexPath)
-                }
-                
-                return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        let isPinned = tracker.isPinned
+        let category = filteredCategories[indexPath.section]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            let pinAction = UIAction(title: isPinned ? "Unpin".localized : "Pin".localized, image: UIImage(systemName: "pin")) { [weak self] _ in
+                self?.togglePin(for: tracker, at: indexPath)
+            }
+            
+            let editAction = UIAction(title: "Edit".localized, image: UIImage(systemName: "pencil")) { [weak self] _ in
+                self?.editTracker(for: tracker, category: category, at: indexPath)
+            }
+            
+            let deleteAction = UIAction(title: "Delete".localized, image: UIImage(systemName: "trash"), attributes: .destructive) { [weak self] _ in
+                self?.deleteTracker(tracker, at: indexPath)
+            }
+            
+            return UIMenu(title: "", children: [pinAction, editAction, deleteAction])
+        }
+    }
+    
+    private func togglePin(for tracker: Tracker, at indexPath: IndexPath) {
+        trackerStore.changePinnedTracker(tracker)
+        categories = trackerCategoryStore.trackerCategories
+        updateVisible()
+        collectionView.reloadData()
+    }
+    
+    private func editTracker(for tracker: Tracker, category: TrackerCategory , at indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
+        let vc = NewTrackerViewController(type: .edit, item: tracker, category: category.name)
+        vc.saveTrackerDelegate = self
+        vc.modalPresentationStyle = .automatic
+        present(vc, animated: true) { [weak self] in
+            DispatchQueue.main.async {
+                self?.updateVisible()
+                self?.collectionView.reloadData()
             }
         }
-        
-        private func togglePin(for tracker: Tracker, at indexPath: IndexPath) {
-            trackerStore.changePinnedTracker(tracker)
-            categories = trackerCategoryStore.trackerCategories
-            updateVisible()
-            collectionView.reloadData()
-        }
-        
-        private func editTracker(for tracker: Tracker, category: TrackerCategory , at indexPath: IndexPath) {
-            analyticsService.report(event: "click", params: ["screen": "Main", "item": "edit"])
-            let vc = NewTrackerViewController(type: .edit, item: tracker, category: category.name)
-            vc.saveTrackerDelegate = self
-            vc.modalPresentationStyle = .automatic
-            present(vc, animated: true) { [weak self] in
-                    DispatchQueue.main.async {
-                        self?.updateVisible()
-                        self?.collectionView.reloadData()
-                    }
-                }
-        }
-        
-        private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
-            analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
-            trackerStore.deleteTracker(tracker)
-            updateVisible()
-            collectionView.reloadData()
-        }
+    }
+    
+    private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
+        analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
+        trackerStore.deleteTracker(tracker)
+        updateVisible()
+        collectionView.reloadData()
+    }
     
 }
 
@@ -526,12 +526,12 @@ extension TrackersViewController: TrackerCategoryStoreDelegate {
 extension TrackersViewController{
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-
+        
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
             updateTheme()
         }
     }
-
+    
     private func updateTheme() {
         view.backgroundColor = .backgroundColor
         label.textColor = .textColor

@@ -266,12 +266,12 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     @objc
     private func didTapCategory() {
         let categoriesVC = CategoriesViewController()
-            categoriesVC.onCategorySelected = { [weak self] selectedCategory in
-                guard let self = self else { return }
-                self.trackerCategory = selectedCategory
-                self.didUpdateCategory(selectedCategory)
-            }
-            present(categoriesVC, animated: true)
+        categoriesVC.onCategorySelected = { [weak self] selectedCategory in
+            guard let self = self else { return }
+            self.trackerCategory = selectedCategory
+            self.didUpdateCategory(selectedCategory)
+        }
+        present(categoriesVC, animated: true)
     }
     
     @objc

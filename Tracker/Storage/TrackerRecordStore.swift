@@ -158,7 +158,7 @@ final class TrackerRecordStore: NSObject {
                     perfectDays.insert(recordDate)
                 }
             }
-
+            
             return longestConsecutiveStreak(from: perfectDays)
         } catch {
             print("ERR: longestPerfectStreak: \(error)")
@@ -171,7 +171,7 @@ final class TrackerRecordStore: NSObject {
         var maxStreak = 0
         var currentStreak = 0
         var previousDate: Date?
-
+        
         for date in sortedDates {
             if let prev = previousDate, Calendar.current.isDate(date, inSameDayAs: Calendar.current.date(byAdding: .day, value: 1, to: prev)!) {
                 currentStreak += 1
@@ -181,7 +181,7 @@ final class TrackerRecordStore: NSObject {
             maxStreak = max(maxStreak, currentStreak)
             previousDate = date
         }
-
+        
         return maxStreak
     }
     

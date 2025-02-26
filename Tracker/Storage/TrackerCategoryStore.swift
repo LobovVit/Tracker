@@ -170,7 +170,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
     func updateTrackerCategory(_ trackerCategory: TrackerCategory) throws {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "name ==[c] %@", trackerCategory.name.trimmingCharacters(in: .whitespacesAndNewlines))
-
+        
         let fetchedResults = try context.fetch(fetchRequest)
         
         let trackerCategoryCoreData: TrackerCategoryCoreData
@@ -181,7 +181,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
             trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
             trackerCategoryCoreData.name = trackerCategory.name
         }
-
+        
         var updatedTrackers = trackerCategoryCoreData.tracker as? Set<TrackerCoreData> ?? Set<TrackerCoreData>()
         updatedTrackers.formUnion(updateTrackersInCategory(trackerCategoryCoreData, with: trackerCategory))
         
@@ -191,9 +191,9 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
     }
     
     func updateTrackersInCategory(_ trackerCategoryCorData: TrackerCategoryCoreData, with category: TrackerCategory) -> Set<TrackerCoreData> {
-
+        
         var newTrackers = Set<TrackerCoreData>()
-
+        
         for tracker in category.trackers {
             if let existingTrackerCoreData = trackerStore.fetchTrackerCoreData(tracker: tracker) {
                 newTrackers.insert(existingTrackerCoreData)
@@ -212,7 +212,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                 newTrackers.insert(newTrackerCoreData)
             }
         }
-
+        
         return newTrackers
     }
     

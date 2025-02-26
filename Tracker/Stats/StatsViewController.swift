@@ -47,13 +47,13 @@ final class StatsViewController: UIViewController {
         card.configure(value: perfectStreak, title: "Лучший период")
         return card
     }()
-
+    
     private lazy var card2: StatCardView = {
         let card = StatCardView()
         card.configure(value: perfectDays, title: "Идеальные дни")
         return card
     }()
-
+    
     private lazy var card3: StatCardView = {
         let card = StatCardView()
         card.configure(value: trackersCompleteCount, title: "Трекеров завершено")
@@ -99,11 +99,11 @@ final class StatsViewController: UIViewController {
         calculateStsts()
         view.addSubview(stackView)
         NSLayoutConstraint.activate([
-                stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-                stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
-            ])
+            stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+        ])
     }
     
     private func addLabel(label: UILabel) {
@@ -115,10 +115,10 @@ final class StatsViewController: UIViewController {
     private func addImage(image: UIImageView) {
         view.addSubview(image)
         NSLayoutConstraint.activate([image.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                                      image.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 0),
-                                      image.widthAnchor.constraint(equalToConstant: 80),
-                                      image.heightAnchor.constraint(equalToConstant: 80)])
-
+                                     image.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 0),
+                                     image.widthAnchor.constraint(equalToConstant: 80),
+                                     image.heightAnchor.constraint(equalToConstant: 80)])
+        
     }
     
     private func addEmptyLabel(label: UILabel) {
@@ -126,5 +126,5 @@ final class StatsViewController: UIViewController {
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
                                      label.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 55)])
     }
-
+    
 }
