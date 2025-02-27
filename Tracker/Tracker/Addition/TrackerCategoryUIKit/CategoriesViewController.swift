@@ -18,9 +18,26 @@ final class CategoriesViewController: UIViewController {
         bindViewModel()
     }
     
+    private lazy var emptyImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(named: "star")
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var emptyLabel: UILabel = {
+        let label = UILabel()
+        label.text = "Привычки и события можно обьеденить по смыслу"
+        label.numberOfLines = 2
+        label.textColor = .textColor
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "Катеория"
+        label.text = "Категория"
         label.textColor = .black
         label.font = .systemFont(ofSize: .init(22), weight: .medium)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -29,7 +46,7 @@ final class CategoriesViewController: UIViewController {
     
     private lazy var additionBtn: UIButton = {
         let button = UIButton()
-        button.setTitle("Добавить катеорию", for: .normal)
+        button.setTitle("Добавить категорию", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .black
         button.layer.cornerRadius = 15;
@@ -41,7 +58,7 @@ final class CategoriesViewController: UIViewController {
     
     private let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = .backgroundColor
         tableView.layer.cornerRadius = 15
         tableView.layer.masksToBounds = true
         tableView.layer.borderWidth = 0.5
@@ -56,6 +73,22 @@ final class CategoriesViewController: UIViewController {
         addLabel(label: label)
         addAdditionBtn(button: additionBtn)
         addTableView(tableView: tableView)
+        addEmpty(label: emptyLabel, image: emptyImageView)
+        if viewModel.categories.count > 0 {
+            emptyLabel.isHidden = true
+            emptyImageView.isHidden = true
+        }
+    }
+    
+    private func addEmpty(label: UILabel, image: UIImageView) {
+        view.addSubview(label)
+        view.addSubview(image)
+        NSLayoutConstraint.activate([image.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                                     image.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                                     label.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 8),
+                                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                                     label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+                                    ])
     }
     
     private func addLabel(label: UILabel) {
@@ -86,7 +119,12 @@ final class CategoriesViewController: UIViewController {
     
     private func bindViewModel() {
         viewModel.categoriesUpdated = { [weak self] _ in
-            self?.tableView.reloadData()
+            guard let self else { return }
+            if self.viewModel.categories.count > 0 {
+                self.emptyLabel.isHidden = true
+                self.emptyImageView.isHidden = true
+            }
+            self.tableView.reloadData()
         }
     }
     

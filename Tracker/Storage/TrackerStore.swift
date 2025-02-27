@@ -114,4 +114,15 @@ final class TrackerStore: NSObject {
         }
     }
     
+    func trackersCount() -> Int {
+        do {
+            let fetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+            let result = try context.fetch(fetchRequest).count
+            return result
+        } catch {
+            print("ERR: trackersCount: \(error)")
+            return 0
+        }
+    }
+    
 }

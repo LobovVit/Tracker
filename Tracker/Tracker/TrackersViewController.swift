@@ -74,7 +74,7 @@ final class TrackersViewController: UIViewController {
         return textField
     }()
     
-    private lazy var imageView: UIImageView = {
+    private lazy var emptyImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "star")
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -85,7 +85,7 @@ final class TrackersViewController: UIViewController {
         let label = UILabel()
         label.text = "What will we track?".localized
         label.textColor = .textColor
-        label.font = .systemFont(ofSize: .init(18), weight: .medium)
+        label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -100,7 +100,6 @@ final class TrackersViewController: UIViewController {
     private lazy var errorLabel: UILabel = {
         let descriptionLabel = UILabel()
         descriptionLabel.text = "Nothing found".localized
-        descriptionLabel.font = .systemFont(ofSize: 18, weight: .medium)
         descriptionLabel.textColor = .textColor
         descriptionLabel.numberOfLines = 2
         descriptionLabel.textAlignment = .center
@@ -147,9 +146,10 @@ final class TrackersViewController: UIViewController {
         addTextField(textField: textField)
         addCollectionView(collection: collectionView)
         addErr(label: errorLabel, image: errorImage)
+        addEmpty(label: emptyLabel, image: emptyImageView)
         addFilterButton()
         updateVisible()
-        
+        updateTheme()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -181,6 +181,7 @@ final class TrackersViewController: UIViewController {
             self.applyFilter(.all)
         }
         let todayAction = UIAlertAction(title: "Trackers for today".localized, style: .default) { _ in
+            self.datePicker.date = Date()
             self.applyFilter(.today)
         }
         let completedAction = UIAlertAction(title: "Completed".localized, style: .default) { _ in
@@ -198,7 +199,6 @@ final class TrackersViewController: UIViewController {
             allAction.setValue(checkmarkImage, forKey: "image")
         case .today:
             todayAction.setValue(checkmarkImage, forKey: "image")
-            datePicker.date = Date()
         case .completed:
             completedAction.setValue(checkmarkImage, forKey: "image")
         case .uncompleted:
@@ -236,14 +236,25 @@ final class TrackersViewController: UIViewController {
         view.addSubview(label)
         view.addSubview(image)
         NSLayoutConstraint.activate([
-            errorImage.topAnchor.constraint(equalTo: view.topAnchor, constant: 402),
-            errorImage.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            errorLabel.topAnchor.constraint(equalTo: errorImage.bottomAnchor, constant: 8),
-            errorLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            errorLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+            image.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            image.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 8),
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
     }
     
+    
+    private func addEmpty(label: UILabel, image: UIImageView) {
+        view.addSubview(label)
+        view.addSubview(image)
+        NSLayoutConstraint.activate([image.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                                     image.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                                     label.topAnchor.constraint(equalTo: image.bottomAnchor, constant: 8),
+                                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                                     label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
+                                    ])
+    }
     
     private func addLabel(label: UILabel) {
         view.addSubview(label)
@@ -274,21 +285,7 @@ final class TrackersViewController: UIViewController {
                                      textField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 100),
                                      textField.heightAnchor.constraint(equalToConstant: 44)])
     }
-    
-    private func addImage(imageView: UIImageView) {
-        self.view.addSubview(imageView)
-        NSLayoutConstraint.activate([imageView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                                     imageView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 0),
-                                     imageView.widthAnchor.constraint(equalToConstant: 80),
-                                     imageView.heightAnchor.constraint(equalToConstant: 80)])
-    }
-    
-    private func addEmptyLabel(label: UILabel) {
-        self.view.addSubview(label)
-        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 0),
-                                     label.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 55)])
-    }
-    
+        
     @objc func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
         updateVisible()
@@ -306,7 +303,7 @@ final class TrackersViewController: UIViewController {
                 
                 switch currentFilter {
                 case .all:
-                    return true
+                    return isTrackerForToday
                 case .today:
                     return isTrackerForToday
                 case .completed:
@@ -318,14 +315,16 @@ final class TrackersViewController: UIViewController {
             return trackers.isEmpty ? nil : TrackerCategory(name: category.name, trackers: trackers)
         }
         
-        showErrorImage(filteredCategories.isEmpty)
+        showErrorImage(filteredCategories.isEmpty, trackerStore.trackersCount() == 0)
         collectionView.reloadData()
     }
     
-    private func showErrorImage(_ show: Bool) {
-        collectionView.isHidden = show
-        errorImage.isHidden = !show
-        errorLabel.isHidden = !show
+    private func showErrorImage(_ showError: Bool, _ showEmty: Bool) {
+        collectionView.isHidden = showError || showEmty
+        errorImage.isHidden = !showError || showEmty
+        errorLabel.isHidden = !showError || showEmty
+        emptyLabel.isHidden = !showEmty
+        emptyImageView.isHidden = !showEmty
     }
     
     private func addCollectionView(collection: UICollectionView) {

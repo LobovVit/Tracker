@@ -1,5 +1,5 @@
 //
-//  StatCardView.swift
+//  StatisticsCardView.swift
 //  Tracker
 //
 //  Created by Vitaly Lobov on 26.02.2025.
@@ -7,9 +7,9 @@
 
 import UIKit
 
-final class StatCardView: UIView {
+final class StatisticsCardView: UIView {
     
-    private let valueLabel: UILabel = {
+    private lazy var valueLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 28)
         label.textColor = .black
@@ -17,7 +17,7 @@ final class StatCardView: UIView {
         return label
     }()
     
-    private let titleLabel: UILabel = {
+    private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 19)
         label.textColor = .black

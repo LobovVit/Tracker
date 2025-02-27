@@ -42,20 +42,20 @@ final class StatsViewController: UIViewController {
         return label
     }()
     
-    private lazy var card1: StatCardView = {
-        let card = StatCardView()
+    private lazy var perfectStreakCard: StatisticsCardView = {
+        let card = StatisticsCardView()
         card.configure(value: perfectStreak, title: "Лучший период")
         return card
     }()
     
-    private lazy var card2: StatCardView = {
-        let card = StatCardView()
+    private lazy var perfectDaysCard: StatisticsCardView = {
+        let card = StatisticsCardView()
         card.configure(value: perfectDays, title: "Идеальные дни")
         return card
     }()
     
-    private lazy var card3: StatCardView = {
-        let card = StatCardView()
+    private lazy var trackersCompleteCountCard: StatisticsCardView = {
+        let card = StatisticsCardView()
         card.configure(value: trackersCompleteCount, title: "Трекеров завершено")
         return card
     }()
@@ -71,24 +71,26 @@ final class StatsViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        NotificationCenter.default.addObserver(self, selector: #selector(calculateStsts), name: .NSManagedObjectContextDidSave, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(calculateStats), name: .NSManagedObjectContextDidSave, object: nil)
         addLabel(label: label)
         addStackView(stackView: stackView)
         addEmptyLabel(label: emptyLabel)
         addImage(image: image)
     }
     
-    @objc private func calculateStsts() {
+    @objc private func calculateStats() {
         trackersCompleteCount = trackerRecordStore.completedTrackers()
-        perfectDays =  trackerRecordStore.countPerfectDays()
+        perfectDays = trackerRecordStore.countPerfectDays()
         perfectStreak = trackerRecordStore.longestPerfectStreak()
-        card1.configure(value: perfectStreak, title: "Лучший период")
-        card2.configure(value: perfectDays, title: "Идеальные дни")
-        card3.configure(value: trackersCompleteCount, title: "Трекеров завершено")
+        perfectStreakCard.configure(value: perfectStreak, title: "Лучший период")
+        perfectDaysCard.configure(value: perfectDays, title: "Идеальные дни")
+        trackersCompleteCountCard.configure(value: trackersCompleteCount, title: "Трекеров завершено")
         if perfectStreak + perfectDays + trackersCompleteCount > 0 {
-            stackView.addArrangedSubview(card1)
-            stackView.addArrangedSubview(card2)
-            stackView.addArrangedSubview(card3)
+            stackView.addArrangedSubview(perfectStreakCard)
+            stackView.addArrangedSubview(perfectDaysCard)
+            stackView.addArrangedSubview(trackersCompleteCountCard)
+            emptyLabel.isHidden = true
+            image.isHidden = true
         } else {
             emptyLabel.isHidden = false
             image.isHidden = false
@@ -96,7 +98,7 @@ final class StatsViewController: UIViewController {
     }
     
     private func addStackView(stackView: UIStackView) {
-        calculateStsts()
+        calculateStats()
         view.addSubview(stackView)
         NSLayoutConstraint.activate([
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),

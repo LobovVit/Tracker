@@ -5,7 +5,6 @@
 //  Created by Vitaly Lobov on 25.02.2025.
 //
 
-import Foundation
 import AppMetricaCore
 
 struct AnalyticsService {
