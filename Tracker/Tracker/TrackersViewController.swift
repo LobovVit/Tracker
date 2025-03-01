@@ -295,12 +295,14 @@ final class TrackersViewController: UIViewController {
         let calendar = Calendar.current
         let selectedDayIndex = calendar.component(.weekday, from: currentDate)
         guard let selectedWeekDay = DayOfWeek.getDayEnum(number: selectedDayIndex) else { return }
-        
-        filteredCategories = categories.compactMap { category in
+
+        var pinnedTrackers: [Tracker] = []
+        var otherCategories: [TrackerCategory] = []
+
+        for category in categories {
             let trackers = category.trackers.filter { tracker in
                 let isTrackerForToday = tracker.scheduler.isEmpty || tracker.scheduler.contains(selectedWeekDay)
                 let isCompleted = isTrackerCompletedToday(id: tracker.id)
-                
                 switch currentFilter {
                 case .all:
                     return isTrackerForToday
@@ -312,9 +314,28 @@ final class TrackersViewController: UIViewController {
                     return isTrackerForToday && !isCompleted
                 }
             }
-            return trackers.isEmpty ? nil : TrackerCategory(name: category.name, trackers: trackers)
+
+            if trackers.isEmpty { continue }
+
+            let pinned = trackers.filter { $0.isPinned }
+            let nonPinned = trackers.filter { !$0.isPinned }
+
+            pinnedTrackers.append(contentsOf: pinned)
+
+            if !nonPinned.isEmpty {
+                otherCategories.append(TrackerCategory(name: category.name, trackers: nonPinned))
+            }
         }
-        
+
+        filteredCategories = []
+
+        if !pinnedTrackers.isEmpty {
+            let pinnedCategory = TrackerCategory(name: "Pinned".localized, trackers: pinnedTrackers)
+            filteredCategories.append(pinnedCategory)
+        }
+
+        filteredCategories.append(contentsOf: otherCategories)
+
         showErrorImage(filteredCategories.isEmpty, trackerStore.trackersCount() == 0)
         collectionView.reloadData()
     }
@@ -401,7 +422,7 @@ extension TrackersViewController: UICollectionViewDataSource, UICollectionViewDe
     // MARK: - UICollectionViewDelegateFlowLayout
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.frame.width - 12) / 2
+        let width = (collectionView.frame.width - 10) / 2
         return CGSize(width: width, height: width)
     }
     
@@ -507,9 +528,16 @@ extension TrackersViewController: TrackerCellDelegate {
     
     private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
         analyticsService.report(event: "click", params: ["screen": "Main", "item": "delete"])
-        trackerStore.deleteTracker(tracker)
-        updateVisible()
-        collectionView.reloadData()
+        let alert = UIAlertController(title: "Are you sure you want to delete the tracker?".localized, message: nil, preferredStyle: .actionSheet)
+        let dellAction = UIAlertAction(title: "Delete".localized, style: .destructive) { _ in
+            self.trackerStore.deleteTracker(tracker)
+            self.updateVisible()
+            self.collectionView.reloadData()
+        }
+        let cancelAction = UIAlertAction(title: "Cancel".localized, style: .cancel)
+        alert.addAction(dellAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true)
     }
     
 }

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "plus.png",
+      "filename" : "Add tracker 3.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
@@ -12,12 +12,12 @@
           "value" : "dark"
         }
       ],
-      "filename" : "plus 3.png",
+      "filename" : "Add tracker.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "plus 1.png",
+      "filename" : "Add tracker 4.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
@@ -28,12 +28,12 @@
           "value" : "dark"
         }
       ],
-      "filename" : "plus 4.png",
+      "filename" : "Add tracker 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "plus 2.png",
+      "filename" : "Add tracker 5.png",
       "idiom" : "universal",
       "scale" : "3x"
     },
@@ -44,7 +44,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "plus 5.png",
+      "filename" : "Add tracker 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

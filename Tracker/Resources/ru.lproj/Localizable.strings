@@ -25,3 +25,10 @@
 "day 1" = "день";
 "days 2-4" = "дня";
 "days" = "дней";
+"Are you sure you want to delete the tracker?" = "Уверены что хотите удалить трекер?";
+"Statistics" = "Статистика";
+"There is nothing to analyze yet" = "Анализировать пока нечего";
+"Best period" = "Лучший период";
+"Perfect Days" = "Идеальные дни";
+"Trackers completed" = "Трекеров завершено";
+"Pinned" = "Закрепленные";

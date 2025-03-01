@@ -17,7 +17,7 @@ final class StatsViewController: UIViewController {
     
     private lazy var label: UILabel = {
         let label = UILabel()
-        label.text = "Статистика"
+        label.text = "Statistics".localized
         label.textColor = .textColor
         label.font = .systemFont(ofSize: .init(34), weight: .bold)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -34,9 +34,8 @@ final class StatsViewController: UIViewController {
     
     private lazy var emptyLabel: UILabel = {
         let label = UILabel()
-        label.text = "Анализировать пока нечего"
+        label.text = "There is nothing to analyze yet".localized
         label.textColor = .textColor
-        label.font = .systemFont(ofSize: .init(18), weight: .medium)
         label.isHidden = true
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -44,19 +43,19 @@ final class StatsViewController: UIViewController {
     
     private lazy var perfectStreakCard: StatisticsCardView = {
         let card = StatisticsCardView()
-        card.configure(value: perfectStreak, title: "Лучший период")
+        card.configure(value: perfectStreak, title: "Best period".localized)
         return card
     }()
     
     private lazy var perfectDaysCard: StatisticsCardView = {
         let card = StatisticsCardView()
-        card.configure(value: perfectDays, title: "Идеальные дни")
+        card.configure(value: perfectDays, title: "Perfect Days".localized)
         return card
     }()
     
     private lazy var trackersCompleteCountCard: StatisticsCardView = {
         let card = StatisticsCardView()
-        card.configure(value: trackersCompleteCount, title: "Трекеров завершено")
+        card.configure(value: trackersCompleteCount, title: "Trackers completed".localized)
         return card
     }()
     
@@ -82,9 +81,9 @@ final class StatsViewController: UIViewController {
         trackersCompleteCount = trackerRecordStore.completedTrackers()
         perfectDays = trackerRecordStore.countPerfectDays()
         perfectStreak = trackerRecordStore.longestPerfectStreak()
-        perfectStreakCard.configure(value: perfectStreak, title: "Лучший период")
-        perfectDaysCard.configure(value: perfectDays, title: "Идеальные дни")
-        trackersCompleteCountCard.configure(value: trackersCompleteCount, title: "Трекеров завершено")
+        perfectStreakCard.configure(value: perfectStreak, title: "Best period".localized)
+        perfectDaysCard.configure(value: perfectDays, title: "Perfect Days".localized)
+        trackersCompleteCountCard.configure(value: trackersCompleteCount, title: "Trackers completed".localized)
         if perfectStreak + perfectDays + trackersCompleteCount > 0 {
             stackView.addArrangedSubview(perfectStreakCard)
             stackView.addArrangedSubview(perfectDaysCard)
