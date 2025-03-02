@@ -130,6 +130,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         textField.leftView = paddingView
         textField.leftViewMode = .always
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.textColor = .black
         textField.accessibilityIdentifier = "nameTextField"
         return textField
     }()

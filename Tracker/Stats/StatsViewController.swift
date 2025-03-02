@@ -75,6 +75,7 @@ final class StatsViewController: UIViewController {
         addStackView(stackView: stackView)
         addEmptyLabel(label: emptyLabel)
         addImage(image: image)
+        updateTheme()
     }
     
     @objc private func calculateStats() {
@@ -84,13 +85,15 @@ final class StatsViewController: UIViewController {
         perfectStreakCard.configure(value: perfectStreak, title: "Best period".localized)
         perfectDaysCard.configure(value: perfectDays, title: "Perfect Days".localized)
         trackersCompleteCountCard.configure(value: trackersCompleteCount, title: "Trackers completed".localized)
+        stackView.addArrangedSubview(perfectStreakCard)
+        stackView.addArrangedSubview(perfectDaysCard)
+        stackView.addArrangedSubview(trackersCompleteCountCard)
         if perfectStreak + perfectDays + trackersCompleteCount > 0 {
-            stackView.addArrangedSubview(perfectStreakCard)
-            stackView.addArrangedSubview(perfectDaysCard)
-            stackView.addArrangedSubview(trackersCompleteCountCard)
+            stackView.isHidden = false
             emptyLabel.isHidden = true
             image.isHidden = true
         } else {
+            stackView.isHidden = true
             emptyLabel.isHidden = false
             image.isHidden = false
         }
@@ -128,4 +131,20 @@ final class StatsViewController: UIViewController {
                                      label.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: 55)])
     }
     
+}
+
+extension StatsViewController{
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateTheme()
+        }
+    }
+    
+    private func updateTheme() {
+        view.backgroundColor = .backgroundColor
+        label.textColor = .textColor
+        emptyLabel.textColor = .textColor
+    }
 }

@@ -29,7 +29,7 @@ final class CategoriesViewController: UIViewController {
         let label = UILabel()
         label.text = "Привычки и события можно обьеденить по смыслу"
         label.numberOfLines = 2
-        label.textColor = .textColor
+        label.textColor = .black
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -58,7 +58,7 @@ final class CategoriesViewController: UIViewController {
     
     private let tableView: UITableView = {
         let tableView = UITableView()
-        tableView.backgroundColor = .backgroundColor
+        tableView.backgroundColor = .white
         tableView.layer.cornerRadius = 15
         tableView.layer.masksToBounds = true
         tableView.layer.borderWidth = 0.5
@@ -142,6 +142,8 @@ extension CategoriesViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         cell.textLabel?.text = viewModel.categories[indexPath.row]
+        cell.textLabel?.textColor = .black
+        cell.backgroundColor = .white
         return cell
     }
     

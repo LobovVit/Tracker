@@ -24,6 +24,22 @@ final class TabBarViewController: UITabBarController {
         )
         self.viewControllers = [trackerViewController, statsViewController]
         self.tabBar.layer.borderWidth = 0.5
+        self.tabBar.layer.borderColor = UIColor.separator.cgColor
         self.tabBar.backgroundColor = .backgroundColor
+    }
+}
+
+extension TabBarViewController{
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateTheme()
+        }
+    }
+    
+    private func updateTheme() {
+        tabBar.backgroundColor = .backgroundColor
+        tabBar.layer.borderColor = UIColor.separator.cgColor
     }
 }

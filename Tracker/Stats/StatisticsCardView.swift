@@ -88,3 +88,19 @@ final class StatisticsCardView: UIView {
         layer.addSublayer(gradientBorder)
     }
 }
+
+extension StatisticsCardView{
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
+            updateTheme()
+        }
+    }
+    
+    private func updateTheme() {
+        backgroundColor = .backgroundColor
+        titleLabel.textColor = .textColor
+        valueLabel.textColor = .textColor
+    }
+}
