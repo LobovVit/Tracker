@@ -35,7 +35,7 @@ final class TrackerCell: UICollectionViewCell {
         emojiView.font = .systemFont(ofSize: 24)
         return emojiView
     }()
-
+    
     private let nameLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
@@ -59,7 +59,16 @@ final class TrackerCell: UICollectionViewCell {
         executeBtn.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
         return executeBtn
     }()
-
+    
+    private lazy var isPinnedView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.image = UIImage(systemName: "pin")
+        imageView.tintColor = .white
+        imageView.contentMode = .scaleAspectFit
+        imageView.isHidden = false
+        return imageView
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.addSubview(imageView)
@@ -67,13 +76,15 @@ final class TrackerCell: UICollectionViewCell {
         contentView.addSubview(nameLabel)
         contentView.addSubview(countLabel)
         contentView.addSubview(executeBtn)
-
+        contentView.addSubview(isPinnedView)
+        
         imageView.translatesAutoresizingMaskIntoConstraints = false
         emojiView.translatesAutoresizingMaskIntoConstraints = false
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
         countLabel.translatesAutoresizingMaskIntoConstraints = false
         executeBtn.translatesAutoresizingMaskIntoConstraints = false
-
+        isPinnedView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             
             imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
@@ -85,7 +96,7 @@ final class TrackerCell: UICollectionViewCell {
             emojiView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             emojiView.widthAnchor.constraint(equalToConstant: 24),
             emojiView.heightAnchor.constraint(equalToConstant: 24),
-
+            
             nameLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -8),
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
@@ -98,13 +109,18 @@ final class TrackerCell: UICollectionViewCell {
             executeBtn.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
             executeBtn.widthAnchor.constraint(equalToConstant: 34),
             executeBtn.heightAnchor.constraint(equalToConstant: 34),
+            
+            isPinnedView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
+            isPinnedView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
+            isPinnedView.widthAnchor.constraint(equalToConstant: 20),
+            isPinnedView.heightAnchor.constraint(equalToConstant: 20)
         ])
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     func configure(with item: Tracker, completedDay: Int, isCompletedToday: Bool, indexPath: IndexPath) {
         self.trackerId = item.id
         self.isCompletedToday = isCompletedToday
@@ -115,6 +131,7 @@ final class TrackerCell: UICollectionViewCell {
         let word = dayWord(for: completedDay)
         countLabel.text = "\(completedDay) \(word)"
         executeBtn.backgroundColor = item.color
+        isPinnedView.isHidden = !item.isPinned
         if isCompletedToday  {
             executeBtn.setImage(UIImage(named: "Done"), for: .normal)
         } else {
@@ -127,15 +144,15 @@ final class TrackerCell: UICollectionViewCell {
         let lastTwoDigits = number % 100
         
         if lastTwoDigits >= 11 && lastTwoDigits <= 19 {
-            return "дней"
+            return "days 11-19".localized
         }
         switch lastDigit {
         case 1:
-            return "день"
+            return "day 1".localized
         case 2, 3, 4:
-            return "дня"
+            return "days 2-4".localized
         default:
-            return "дней"
+            return "days".localized
         }
     }
     

@@ -47,6 +47,7 @@ final class CategoryViewController: UIViewController {
         textField.placeholder = "Введите название категории"
         textField.layer.cornerRadius = 15;
         textField.layer.masksToBounds = true
+        textField.textColor = .black
         textField.backgroundColor = .ypGray
         textField.layer.borderWidth = 0.5
         textField.layer.borderColor = UIColor.lightGray.cgColor

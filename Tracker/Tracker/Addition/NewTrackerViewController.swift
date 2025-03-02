@@ -92,7 +92,6 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private lazy var saveBtn: UIButton = {
         let button = UIButton()
-        //button.setTitle("Создать", for: .normal)
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 15;
         button.layer.borderColor = .init(red: 0.8, green: 0.0, blue: 0.0, alpha: 0.0)
@@ -131,6 +130,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
         textField.leftView = paddingView
         textField.leftViewMode = .always
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.textColor = .black
         textField.accessibilityIdentifier = "nameTextField"
         return textField
     }()
@@ -267,12 +267,12 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     @objc
     private func didTapCategory() {
         let categoriesVC = CategoriesViewController()
-            categoriesVC.onCategorySelected = { [weak self] selectedCategory in
-                guard let self = self else { return }
-                self.trackerCategory = selectedCategory
-                self.didUpdateCategory(selectedCategory)
-            }
-            present(categoriesVC, animated: true)
+        categoriesVC.onCategorySelected = { [weak self] selectedCategory in
+            guard let self = self else { return }
+            self.trackerCategory = selectedCategory
+            self.didUpdateCategory(selectedCategory)
+        }
+        present(categoriesVC, animated: true)
     }
     
     @objc
@@ -374,7 +374,7 @@ final class NewTrackerViewController: UIViewController, ScheduleViewControllerDe
     
     private func addCategoryBtn(button: DetailButton) {
         contentView.addSubview(button)
-        isEdit ? didUpdateCategory(trackerCategory) : didUpdateCategory("")
+        isEdit ? didUpdateCategory(trackerCategory) : {}()
         NSLayoutConstraint.activate([button.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
                                      button.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
                                      button.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 90),

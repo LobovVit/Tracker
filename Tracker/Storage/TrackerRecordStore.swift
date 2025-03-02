@@ -32,11 +32,11 @@ final class TrackerRecordStore: NSObject {
         
         fetchRequest.predicate = NSPredicate(format: "id == %@ AND date == %@", id as CVarArg, startOfDay as CVarArg)
         do {
-             let result = try context.fetch(fetchRequest)
-             return result.first
-         } catch {
-             throw error
-         }
+            let result = try context.fetch(fetchRequest)
+            return result.first
+        } catch {
+            throw error
+        }
     }
     
     func updateRecord(id: UUID, date: Date) throws {
@@ -54,7 +54,6 @@ final class TrackerRecordStore: NSObject {
             let newRecord = TrackerRecordCodeData(context: context)
             newRecord.id = id
             newRecord.date = dateWithoutTime
-            print("Записано, что трекер \(id) выполнен \(dateWithoutTime)")
         }
         saveContext()
     }
@@ -63,7 +62,6 @@ final class TrackerRecordStore: NSObject {
         if let record = try fetchRecord(id: id, date: date) {
             self.context.delete(record)
             self.saveContext()
-            print("Удалена запись трекера \(id) за \(date)")
         }
     }
     
@@ -75,9 +73,122 @@ final class TrackerRecordStore: NSObject {
         return dates
     }
     
+    func completedTrackers() -> Int {
+        do {
+            let fetchRequest: NSFetchRequest<TrackerRecordCodeData> = TrackerRecordCodeData.fetchRequest()
+            let result = try context.fetch(fetchRequest).count
+            return result
+        } catch {
+            print("ERR: completedTrackers: \(error)")
+            return 0
+        }
+    }
+    
+    func countPerfectDays() -> Int {
+        do {
+            let trackersFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+            let allTrackers = try context.fetch(trackersFetchRequest)
+            
+            let recordsFetchRequest: NSFetchRequest<TrackerRecordCodeData> = TrackerRecordCodeData.fetchRequest()
+            let allRecords = try context.fetch(recordsFetchRequest)
+            
+            var recordsByDate: [Date: Set<UUID>] = [:]
+            for record in allRecords {
+                guard let recordID = record.id, let recordDate = record.date else { continue }
+                recordsByDate[recordDate, default: []].insert(recordID)
+            }
+            
+            var perfectDaysCount = 0
+            
+            for (recordDate, completedTrackers) in recordsByDate {
+                let calendar = Calendar.current
+                let dayNumber = calendar.component(.weekday, from: recordDate) 
+                guard let weekDay = DayOfWeek.getDayEnum(number: dayNumber) else { continue }
+                
+                let scheduledTrackers = allTrackers.filter { tracker in
+                    guard let scheduleJSON = tracker.scheduler,
+                          let scheduleDays = scheduleJSON.toEnumArray() as [DayOfWeek]? else { return false }
+                    return scheduleDays.contains(weekDay)
+                }
+                
+                let scheduledTrackerIDs = Set(scheduledTrackers.compactMap { $0.id })
+                
+                if !scheduledTrackerIDs.isEmpty, scheduledTrackerIDs.isSubset(of: completedTrackers) {
+                    perfectDaysCount += 1
+                }
+            }
+            
+            return perfectDaysCount
+        } catch {
+            print("ERR: countPerfectDays: \(error)")
+            return 0
+        }
+    }
+    
+    func longestPerfectStreak() -> Int {
+        do {
+            let trackersFetchRequest: NSFetchRequest<TrackerCoreData> = TrackerCoreData.fetchRequest()
+            let allTrackers = try context.fetch(trackersFetchRequest)
+            
+            let recordsFetchRequest: NSFetchRequest<TrackerRecordCodeData> = TrackerRecordCodeData.fetchRequest()
+            let allRecords = try context.fetch(recordsFetchRequest)
+            
+            var recordsByDate: [Date: Set<UUID>] = [:]
+            for record in allRecords {
+                guard let recordID = record.id, let recordDate = record.date else { continue }
+                recordsByDate[recordDate, default: []].insert(recordID)
+            }
+            
+            var perfectDays: Set<Date> = []
+            
+            for (recordDate, completedTrackers) in recordsByDate {
+                let calendar = Calendar.current
+                let dayNumber = calendar.component(.weekday, from: recordDate)
+                guard let weekDay = DayOfWeek.getDayEnum(number: dayNumber) else { continue }
+                
+                let scheduledTrackers = allTrackers.filter { tracker in
+                    guard let scheduleJSON = tracker.scheduler,
+                          let scheduleDays = scheduleJSON.toEnumArray() as [DayOfWeek]? else { return false }
+                    return scheduleDays.contains(weekDay)
+                }
+                
+                let scheduledTrackerIDs = Set(scheduledTrackers.compactMap { $0.id })
+                
+                if !scheduledTrackerIDs.isEmpty, scheduledTrackerIDs.isSubset(of: completedTrackers) {
+                    perfectDays.insert(recordDate)
+                }
+            }
+            
+            return longestConsecutiveStreak(from: perfectDays)
+        } catch {
+            print("ERR: longestPerfectStreak: \(error)")
+            return 0
+        }
+    }
+    
+    private func longestConsecutiveStreak(from dates: Set<Date>) -> Int {
+        let sortedDates = dates.sorted()
+        var maxStreak = 0
+        var currentStreak = 0
+        var previousDate: Date?
+        
+        for date in sortedDates {
+            if let prev = previousDate, Calendar.current.isDate(date, inSameDayAs: Calendar.current.date(byAdding: .day, value: 1, to: prev)!) {
+                currentStreak += 1
+            } else {
+                currentStreak = 1
+            }
+            maxStreak = max(maxStreak, currentStreak)
+            previousDate = date
+        }
+        
+        return maxStreak
+    }
+    
     private func saveContext() {
         do {
             try context.save()
+            NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: nil)
         } catch {
             context.rollback()
         }

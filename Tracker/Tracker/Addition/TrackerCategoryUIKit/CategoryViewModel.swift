@@ -42,7 +42,7 @@ final class CategoryViewModel {
             try trackerCategoryStore.updateTrackerCategory(TrackerCategory(name: newCategoryName, trackers: []))
             loadCategories()
         } catch {
-            print("Error updating category: \(error)")
+            print("ERR: updating category: \(error)")
         }
     }
 }

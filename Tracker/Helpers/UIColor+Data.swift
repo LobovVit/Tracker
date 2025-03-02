@@ -19,3 +19,17 @@ extension UIColor {
     }
     
 }
+
+extension UIColor {
+    static let backgroundColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ? .black : .white
+    }
+    
+    static let textColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ? .white : .black
+    }
+    
+    static let searchBarColor = UIColor { traitCollection in
+        return traitCollection.userInterfaceStyle == .dark ? .darkGray : .systemGray6
+    }
+}

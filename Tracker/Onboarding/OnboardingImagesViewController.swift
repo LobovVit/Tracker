@@ -43,7 +43,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
         if let firstVC = viewControllerForImage(at: 0) {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
-            addLoadBtn(button: loadBtn)
+        //addLoadBtn(button: loadBtn)
         addPageControl(pageControl: pageControl)
     }
     
@@ -55,7 +55,7 @@ final class OnboardingImagesViewController: UIPageViewController, UIPageViewCont
     }
     
     @objc
-    private func didTapLoadBtn() {
+    func didTapLoadBtn() {
         trackerCategoryStore.clearCoreData(for: "TrackerCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerCategoryCoreData")
         trackerCategoryStore.clearCoreData(for: "TrackerRecordCodeData")

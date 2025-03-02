@@ -110,11 +110,7 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
         let newCategory = TrackerCategoryCoreData(context: context)
         newCategory.name = trimmedName
         
-        do {
-            try context.save()
-        } catch {
-            print("Err: Ошибка при сохранении категории: \(error)")
-        }
+        saveContext()
     }
     
     func fetchAllCategories() -> [TrackerCategoryCoreData] {
@@ -162,7 +158,8 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                     throw TrackerCategoryStoreError.missingEmoji
                 }
                 let schedule: [DayOfWeek] = trackerCoreData.scheduler?.toEnumArray() ?? []
-                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: false))
+                let isPinned: Bool = trackerCoreData.isPinned
+                trackers.append(Tracker(id: id, name: name, color: color, emoji: emoji, scheduler: schedule, isPinned: isPinned))
             } catch {
                 print("Err: trackerCoreData in trackerSet for \(name): \(error)")
             }
@@ -172,31 +169,37 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
     
     func updateTrackerCategory(_ trackerCategory: TrackerCategory) throws {
         let fetchRequest: NSFetchRequest<TrackerCategoryCoreData> = TrackerCategoryCoreData.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "name == %@", trackerCategory.name)
+        fetchRequest.predicate = NSPredicate(format: "name ==[c] %@", trackerCategory.name.trimmingCharacters(in: .whitespacesAndNewlines))
         
         let fetchedResults = try context.fetch(fetchRequest)
         
-        if let trackerCategoryCoreData = fetchedResults.first {
-            updateTrackersInCategory(trackerCategoryCoreData, with: trackerCategory)
-            try context.save()
+        let trackerCategoryCoreData: TrackerCategoryCoreData
+        
+        if let existingCategory = fetchedResults.first {
+            trackerCategoryCoreData = existingCategory
         } else {
-            let trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
-            updateTrackersInCategory(trackerCategoryCoreData, with: trackerCategory)
-            try context.save()
+            trackerCategoryCoreData = TrackerCategoryCoreData(context: context)
+            trackerCategoryCoreData.name = trackerCategory.name
         }
         
+        var updatedTrackers = trackerCategoryCoreData.tracker as? Set<TrackerCoreData> ?? Set<TrackerCoreData>()
+        updatedTrackers.formUnion(updateTrackersInCategory(trackerCategoryCoreData, with: trackerCategory))
         
+        trackerCategoryCoreData.tracker = updatedTrackers as NSSet
+        
+        saveContext()
     }
     
-    func updateTrackersInCategory(_ trackerCategoryCorData: TrackerCategoryCoreData, with category: TrackerCategory) {
-        trackerCategoryCorData.name = category.name
-        trackerCategoryCorData.tracker = category.trackers.reduce(into: Set<TrackerCoreData>()) { result, tracker in
+    func updateTrackersInCategory(_ trackerCategoryCorData: TrackerCategoryCoreData, with category: TrackerCategory) -> Set<TrackerCoreData> {
+        
+        var newTrackers = Set<TrackerCoreData>()
+        
+        for tracker in category.trackers {
             if let existingTrackerCoreData = trackerStore.fetchTrackerCoreData(tracker: tracker) {
-                result.insert(existingTrackerCoreData)
+                newTrackers.insert(existingTrackerCoreData)
             } else {
                 guard let context = trackerCategoryCorData.managedObjectContext else {
-                    print("ERR: managedObjectContext равен nil")
-                    return
+                    continue
                 }
                 let newTrackerCoreData = TrackerCoreData(context: context)
                 newTrackerCoreData.id = tracker.id
@@ -204,10 +207,13 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
                 newTrackerCoreData.color = tracker.color.toData() ?? Data()
                 newTrackerCoreData.emoji = tracker.emoji
                 newTrackerCoreData.scheduler = tracker.scheduler.toJSONString()
+                newTrackerCoreData.isPinned = tracker.isPinned
                 newTrackerCoreData.category = trackerCategoryCorData
-                result.insert(newTrackerCoreData)
+                newTrackers.insert(newTrackerCoreData)
             }
-        } as NSSet
+        }
+        
+        return newTrackers
     }
     
     func clearCoreData(for entityName: String) {
@@ -216,9 +222,18 @@ final class TrackerCategoryStore: NSObject, ObservableObject {
         
         do {
             try context.execute(deleteRequest)
-            try context.save()
         } catch {
             print("Err: clearCoreData: \(error.localizedDescription)")
+        }
+        saveContext()
+    }
+    
+    private func saveContext() {
+        do {
+            try context.save()
+            NotificationCenter.default.post(name: .NSManagedObjectContextDidSave, object: nil)
+        } catch {
+            context.rollback()
         }
     }
     

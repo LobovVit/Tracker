@@ -44,6 +44,7 @@ final class SceduleViewController: UIViewController {
     private lazy var monLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.cornerRadius = 15
         label.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         label.layer.masksToBounds = true
@@ -71,6 +72,7 @@ final class SceduleViewController: UIViewController {
     private lazy var tueLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
         label.layer.borderWidth = 0.5
@@ -95,6 +97,7 @@ final class SceduleViewController: UIViewController {
     private lazy var wedLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
         label.layer.borderWidth = 0.5
@@ -119,6 +122,7 @@ final class SceduleViewController: UIViewController {
     private lazy var thuLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
         label.layer.borderWidth = 0.5
@@ -143,6 +147,7 @@ final class SceduleViewController: UIViewController {
     private lazy var friLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
         label.layer.borderWidth = 0.5
@@ -167,6 +172,7 @@ final class SceduleViewController: UIViewController {
     private lazy var satLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.borderColor = UIColor.lightGray.cgColor
         label.backgroundColor = .ypGray
         label.layer.borderWidth = 0.5
@@ -191,6 +197,7 @@ final class SceduleViewController: UIViewController {
     private lazy var sunLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
+        label.textColor = .black
         label.layer.cornerRadius = 15
         label.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         label.layer.masksToBounds = true
